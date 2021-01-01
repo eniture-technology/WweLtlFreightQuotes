@@ -7,9 +7,7 @@
     "OSL-3.0",
     "AFL-3.0"
   ],
-  "require": {
-    "magento/framework": "~100.0.4"
-  },
+  "require": {},
   "authors": [
     {
       "name": "Eniture Technology",
@@ -23,5 +21,7 @@
     "psr-4": {
       "Eniture\\WweLtlFreightQuotes\\": ""
     }
-  } 
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true 
 }
