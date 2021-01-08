@@ -1,6 +1,6 @@
 <?php
 
-namespace Eniture\WweLTLFreightQuotes\Model\Carrier;
+namespace Eniture\WweLtlFreightQuotes\Model\Carrier;
 
 use Eniture\WweLtlFreightQuotes\Helper\EnConstants;
 use Magento\Store\Model\ScopeInterface;
