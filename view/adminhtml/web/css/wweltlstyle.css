@@ -235,18 +235,20 @@ label[for="WweLtConnSettings_first_WweLtAccountNumber"]:after, label[for="WweLtC
     margin-top: 30px;
 }
 
-.bootstrap-tagsinput {
+.WweLt-add-wh-modal .bootstrap-tagsinput,
+.WweLt-add-ds-modal .bootstrap-tagsinput {
     text-align: left;
-    margin-right: 1.8%;
     border-radius: 0 !important;
     width: 100% !important;
     box-shadow: none !important;
     border-color: #adadad !important;
     padding-bottom: 0 !important;
     padding-top: 0 !important;
+    margin: 0;
 }
 
-.bootstrap-tagsinput input {
+.WweLt-add-wh-modal .bootstrap-tagsinput input,
+.WweLt-add-ds-modal .bootstrap-tagsinput input {
     width: auto !important;
     margin: 0 !important;
     border: none !important;
@@ -254,7 +256,8 @@ label[for="WweLtConnSettings_first_WweLtAccountNumber"]:after, label[for="WweLtC
     background: transparent !important;
 }
 
-.bootstrap-tagsinput .tag.label.label-info {
+.WweLt-add-wh-modal .bootstrap-tagsinput .tag.label.label-info,
+.WweLt-add-ds-modal .bootstrap-tagsinput .tag.label.label-info {
     display: inline-block;
     padding: 2px 3px 3px 4px !important;
     border-radius: 5px;
@@ -262,7 +265,8 @@ label[for="WweLtConnSettings_first_WweLtAccountNumber"]:after, label[for="WweLtC
     vertical-align: middle !important
 }
 
-.bootstrap-tagsinput .tag.label.label-info span {
+.WweLt-add-wh-modal .bootstrap-tagsinput .tag.label.label-info span,
+.WweLt-add-ds-modal .bootstrap-tagsinput .tag.label.label-info span {
     text-align: right;
     float: none;
 }
@@ -279,7 +283,8 @@ label[for="WweLtQuoteSetting_third_symbolicHndlngFee"] {
 }
 
 /* Tooltip text */
-.suppressTooltip .suppressTooltiptext {
+.WweLt-add-wh-modal .suppressTooltip .suppressTooltiptext,
+.WweLt-add-ds-modal .suppressTooltip .suppressTooltiptext {
     visibility: hidden;
     width: 370px;
     color: #000;

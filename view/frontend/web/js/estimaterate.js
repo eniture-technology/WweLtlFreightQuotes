@@ -13,11 +13,12 @@ define([
 ], function (_, $, storage, errorProcessor, quote, ko, totalsService, shippingService, rateRegistry, resourceUrlManager, totalsDefaultProvider) {
     'use strict';
     $.widget('mage.estimateRate', {
-        options: {},
+        options: {
+        },
         _create: function () {
             var self = this;
             $(document).ready(function () {
-                $('[name=country_id], [name=region_id], [name=postcode], [name=city]').each(function (index) {
+                $('[name=country_id], [name=region_id], [name=postcode], [name=city]').each(function( index ) {
                     ko.cleanNode(this);
                 });
                 var btndata = "<button id='getrate' class='getrate'>Get Shipping Quotes</button>";
@@ -52,14 +53,15 @@ define([
             storage.post(
                 serviceUrl, payload, false
             ).done(function (result) {
+                //rateRegistry.set(address.getKey(), null);
                 rateRegistry.set(quote.shippingAddress().getCacheKey(), result);
                 shippingService.setShippingRates(result);
                 $("#co-shipping-method-form [type=radio]").on('click', function (e) {
                     var interval = null;
-                    interval = setInterval(setTotals, 500);
+                    interval = setInterval(setTotals,500);
 
-                    function setTotals() {
-                        if (!totalsService.isLoading()) {
+                    function setTotals(){
+                        if(!totalsService.isLoading()){
                             var quoteShipAmnt = parseFloat(quote.shippingMethod()['amount']);
                             var parsedQuoteShipAmnt = quoteShipAmnt.toFixed(2);
                             var shipAmt = parsedQuoteShipAmnt.toString();
@@ -73,9 +75,9 @@ define([
 
                             var shipPrice = jQuery('.shipping > td.amount').find('.price').text();
                             var currency = shipPrice.substring(0, 1);
-                            var updatedShipPrice = jQuery('.shipping > td.amount').find('.price').text(currency + shipAmt);
+                            var updatedShipPrice = jQuery('.shipping > td.amount').find('.price').text(currency+shipAmt);
 
-                            var updatedgndTotal = jQuery('.grand > td.amount').find('.price').text(currency + total1);
+                            var updatedgndTotal = jQuery('.grand > td.amount').find('.price').text(currency+total1);
                             clearInterval(interval);
                         }
                     }
@@ -97,7 +99,7 @@ define([
     /**
      * @return {estimaterateL#12.getShippingAddress1.address}
      */
-    function getShippingAddress1() {
+    function getShippingAddress1(){
         var address = {
             'city': $('input[name="city"]').val(),
             'countryId': $('select[name="country_id"]').val(),

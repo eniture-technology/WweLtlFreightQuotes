@@ -7,7 +7,6 @@ use Eniture\WweLtlFreightQuotes\Helper\EnConstants;
 use Magento\Catalog\Model\ProductFactory;
 use Magento\Checkout\Model\Cart;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Module\Manager;
 use Magento\Framework\ObjectManagerInterface;
@@ -52,8 +51,6 @@ class WweLTLShipping extends AbstractCarrier implements
     private $session;
 
     private $productLoader;
-
-    private $mageVersion;
 
     private $objectManager;
     /**
@@ -104,7 +101,6 @@ class WweLTLShipping extends AbstractCarrier implements
      * @param UrlInterface $urlInterface
      * @param SessionManagerInterface $session
      * @param ProductFactory $productLoader
-     * @param ProductMetadataInterface $productMetadata
      * @param ObjectManagerInterface $objectManager
      * @param WweLTLGenerateRequestData $generateReqData
      * @param WweLTLManageAllQuotes $manAllQuotes
@@ -127,7 +123,6 @@ class WweLTLShipping extends AbstractCarrier implements
         UrlInterface $urlInterface,
         SessionManagerInterface $session,
         ProductFactory $productLoader,
-        ProductMetadataInterface $productMetadata,
         ObjectManagerInterface $objectManager,
         WweLTLGenerateRequestData $generateReqData,
         WweLTLManageAllQuotes $manAllQuotes,
@@ -148,7 +143,6 @@ class WweLTLShipping extends AbstractCarrier implements
         $this->urlInterface = $urlInterface;
         $this->session = $session;
         $this->productLoader = $productLoader;
-        $this->mageVersion = $productMetadata->getVersion();
         $this->objectManager = $objectManager;
         $this->generateReqData = $generateReqData;
         $this->manageAllQuotes = $manAllQuotes;
@@ -167,7 +161,7 @@ class WweLTLShipping extends AbstractCarrier implements
     {
         $this->adminConfig->_init($this->scopeConfig, $this->registry);
 
-        $this->generateReqData->_init($this->scopeConfig, $this->registry, $this->moduleManager, $this->request);
+        $this->generateReqData->_init($this->scopeConfig, $this->registry, $this->moduleManager, $this->request, $this->dataHelper);
 
         $this->manageAllQuotes->_init($this->scopeConfig, $this->registry, $this->session, $this->objectManager);
 
@@ -389,8 +383,12 @@ class WweLTLShipping extends AbstractCarrier implements
      */
     private function getDims($_product, $dimOf)
     {
-        $dim = ($this->mageVersion < '2.2.5') ? 'en_' . $dimOf : 'ts_dimensions_' . $dimOf;
-        return $_product->getData($dim);
+        $dimValue = $_product->getData('ts_dimensions_'.$dimOf);
+        if($dimValue != null){
+            return $dimValue;
+        }
+
+        return $_product->getData('en_'.$dimOf);
     }
 
     /**

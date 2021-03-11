@@ -51,7 +51,7 @@ class WweLTLAdminConfiguration
         $this->setCodesGlobally('enitureCarrierTitle', 'Worldwide Express LTL Freight Quotes');
         $this->setCodesGlobally('enitureHelpersCodes', '\Eniture\WweLtlFreightQuotes');
         $this->setCodesGlobally('enitureActiveModules', $this->checkModuleIsEnabled());
-        $this->setCodesGlobally('enatureModuleTypes', 'ltl');
+        $this->setCodesGlobally('enitureModuleTypes', 'ltl');
     }
 
     /**

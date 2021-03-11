@@ -68,7 +68,6 @@ class WweLTLShipmentPackage
         $this->request = $request;
         $whQuery = $this->dataHelper->fetchWarehouseSecData('warehouse');
         $enableDropShip = $_product->getData('en_dropship');
-
         if ($enableDropShip) {
             $dropShipID = $_product->getData('en_dropship_location');
             $originList = $this->dataHelper->fetchWarehouseWithID('dropship', $dropShipID);
@@ -162,9 +161,9 @@ class WweLTLShipmentPackage
                 'country' => $this->request->getDestCountryId(),
             ],
             'ServerName' => $this->httpRequest->getServer('SERVER_NAME'),
-            'eniureLicenceKey' => $this->scopeConfig->getValue('wweLtlConnSettings/first/WweLtllicnsKey', ScopeInterface::SCOPE_STORE),
+            'eniureLicenceKey' => $this->scopeConfig->getValue('WweLtConnSettings/first/WweLtLicenseKey', ScopeInterface::SCOPE_STORE),
         ];
-        $curlRes = $this->dataHelper->wweLTLSendCurlRequest(EnConstants::GOOGLE_URL, $post);
+        $curlRes = $this->dataHelper->sendCurlRequest(EnConstants::GOOGLE_URL, $post);
 
         if (!isset($curlRes->error)) {
             $response = $curlRes;

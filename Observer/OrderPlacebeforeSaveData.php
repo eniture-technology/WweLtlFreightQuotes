@@ -51,22 +51,23 @@ class OrderPlacebeforeSaveData implements ObserverInterface
             }
 
             $method = $order->getShippingMethod();
+
             if (strpos($method, 'ENWweLTL') !== false) {
                 $semiOrderDetailData = $this->coreSession->getSemiOrderDetailSession();
-                $orderDetailData = $this->coreSession->getOrderDetailSession();
+                $orderDetailData = $this->coreSession->getWweLtlOrderDetailSession();
                 if ($orderDetailData != null && $semiOrderDetailData == null) {
                     if (count($orderDetailData['shipmentData']) > 1) {
                         $multiShip = true;
                     }
                     $orderDetailData = $this->getData($order, $method, $orderDetailData, $multiShip);
                 } elseif ($semiOrderDetailData) {
-                    $orderDetailData = $semiOrderDetailData;
+                    $orderDetailData = $semiOrderDetailData['wweLTL'];
                     $this->coreSession->unsSemiOrderDetailSession();
                 }
                 $order->setData('order_detail_data', json_encode($orderDetailData));
                 $order->save();
                 if (!$isMulti) {
-                    $this->coreSession->unsOrderDetailSession();
+                    $this->coreSession->unsWweLtlOrderDetailSession();
                 }
             }
         } catch (\Exception $e) {

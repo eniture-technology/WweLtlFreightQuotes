@@ -52,8 +52,7 @@ class WweLTLManageAllQuotes
         $registry,
         $session,
         $objectManager
-    )
-    {
+    ) {
         $this->scopeConfig = $scopeConfig;
         $this->registry = $registry;
         $this->session = $session;
@@ -72,14 +71,14 @@ class WweLTLManageAllQuotes
         $moduleTypesArr = $this->registry->registry('enitureModuleTypes');
         $quotesArr = (array)$this->quotes;
         $quotesArr = $this->removeErrorFromQuotes($quotesArr);
-
         $this->quotes = $quotesArr;
 
         $quotesCount = count($quotesArr);
 
         if ($quotesCount == 1) {
-            return $this->wweGetAllQuotes();
+            return $this->wweLTLGetAllQuotes();
         } elseif ($quotesCount > 1) {
+
             $smallModulesArr = array_filter($moduleTypesArr, function ($value) {
                 return ($value == 'small');
             });
@@ -87,7 +86,6 @@ class WweLTLManageAllQuotes
             $ltlModulesArr = array_filter($moduleTypesArr, function ($value) {
                 return ($value == 'ltl');
             });
-
             $this->smallPackagesQuotes = array_intersect_key($quotesArr, $smallModulesArr);
             $this->ltlPackagesQuotes = array_intersect_key($quotesArr, $ltlModulesArr);
 
@@ -101,11 +99,12 @@ class WweLTLManageAllQuotes
                     $resultQuotes = $this->wweLTLGetAllQuotes(false, true);
                     return $this->getQuotesForMultiShipment($resultQuotes, $smallModulesArr, $ltlModulesArr);
                 } else {
-                    $resultQuotesArr = $this->wweLTLGetAllQuotes(true, false);
+                    $resultQuotesArr = $this->wweLTLGetAllQuotes(true, true);
                     $smallQuotesArr = array_intersect_key($resultQuotesArr, $smallModulesArr);
                     $ltlQuotesArr = array_intersect_key($resultQuotesArr, $ltlModulesArr);
                     $this->setOdwData($smallQuotesArr, $ltlQuotesArr, []);
                     $minSmallRate = $this->findMinimumSmall($smallQuotesArr);
+
                     return $this->updateLtlQuotes($ltlQuotesArr, $minSmallRate);
                 }
             }
@@ -116,13 +115,16 @@ class WweLTLManageAllQuotes
 
     /**
      * This function returns final quotes to show
-     * @param array $resultQuotes
-     * @param array $smallModulesArr
-     * @param array $ltlModulesArr
+     * @param $resultQuotes
+     * @param $smallModulesArr
+     * @param $ltlModulesArr
      * @return array
      */
-    public function getQuotesForMultiShipment($resultQuotes, $smallModulesArr, $ltlModulesArr)
-    {
+    public function getQuotesForMultiShipment(
+        $resultQuotes,
+        $smallModulesArr,
+        $ltlModulesArr
+    ) {
         $smallQuotesArr = array_intersect_key($resultQuotes, $smallModulesArr);
         $ltlQuotesArr = array_intersect_key($resultQuotes, $ltlModulesArr);
         $allLtlQuotesArr = $this->getAllQuotes($ltlQuotesArr);
@@ -145,7 +147,6 @@ class WweLTLManageAllQuotes
     public function getLtlQuoteForMultishipping($minimumCommonArr, $ltlModulesArr, $ltlQuotesArr, $minimumSmallRate)
     {
         $ltlQuotesFinalArr = [];
-
         // if ltl quotes return nothing
         if (!empty($ltlQuotesArr)) {
             foreach ($ltlQuotesArr as $mainKey => $originArr) {
@@ -157,7 +158,7 @@ class WweLTLManageAllQuotes
                     }
                 }
                 $ltlQuotesFinalArr[$mainKey][] = [
-                    'code' => 'Freight',
+                    'code' => $mainKey.'_Freight',
                     'title' => 'Freight ' . $this->resiLabel,
                     'rate' => $ltlRate
                 ];
@@ -166,7 +167,7 @@ class WweLTLManageAllQuotes
             if ($minimumSmallRate > 0) {
                 foreach ($ltlModulesArr as $key => $value) {
                     $ltlQuotesFinalArr[$key][] = [
-                        'code' => 'Freight',
+                        'code' => $key.'_Freight',
                         'title' => 'Freight ' . $this->resiLabel,
                         'rate' => $minimumSmallRate
                     ];
@@ -185,8 +186,7 @@ class WweLTLManageAllQuotes
     public function getMinimumCommonQuotes(
         $commonQuotesArr,
         $resultQuotes
-    )
-    {
+    ) {
         if (!empty($commonQuotesArr)) {
             $minComQuotesArr = $commonQuotesArr;
 
@@ -223,31 +223,30 @@ class WweLTLManageAllQuotes
     public function getMinimumSmallQuotesRate(
         $minimumCommonArr,
         $smallQuotes
-    )
-    {
-        $minimumSmallQuotes = [];
+    ) {
+        $minSmallQuotes = [];
         if (isset($smallQuotes) && !empty($smallQuotes)) {
             foreach ($smallQuotes as $originArr) {
                 foreach ($originArr as $key => $value) {
                     if (!array_key_exists($key, $minimumCommonArr)) {
-                        if (array_key_exists($key, $minimumSmallQuotes)) {
-                            if ($value['rate'] < $minimumSmallQuotes[$key]['rate']) {
-                                $minimumSmallQuotes[$key] = $value;
+                        if (array_key_exists($key, $minSmallQuotes)) {
+                            if ($value['rate'] < $minSmallQuotes[$key]['rate']) {
+                                $minSmallQuotes[$key] = $value;
                             }
                         } else {
-                            $minimumSmallQuotes[$key] = $value;
+                            $minSmallQuotes[$key] = $value;
                         }
                     }
                 }
             }
         }
-        $minSmallQuotesArray = array_merge($minimumSmallQuotes, $minimumCommonArr);
+        $minSmallQuotesArray = array_merge($minSmallQuotes, $minimumCommonArr);
         return array_sum(array_column($minSmallQuotesArray, 'rate'));
     }
 
     /**
      * This function put specific array to common array
-     * @param array $quotesArr
+     * @param $quotesArr
      * @return array
      */
     public function getAllQuotes($quotesArr)
@@ -272,17 +271,22 @@ class WweLTLManageAllQuotes
 
         foreach ($this->ltlPackagesQuotes as $mainKey => $mainValue) {
             foreach ($mainValue as $key => $value) {
-                array_push($ltlOriginArr, $key);
+                if(!in_array($key, $ltlOriginArr)){
+                    array_push($ltlOriginArr, $key);
+                }
             }
         }
 
         foreach ($this->smallPackagesQuotes as $mainKey => $mainValue) {
             foreach ($mainValue as $key => $value) {
-                array_push($smallOriginArr, $key);
+                if(!in_array($key, $smallOriginArr)) {
+                    array_push($smallOriginArr, $key);
+                }
             }
         }
 
         $commonValuesArr = array_intersect($ltlOriginArr, $smallOriginArr);
+
         if (!empty($commonValuesArr)) {
             $multiPackage = 'semi';
             if (count($commonValuesArr) == count($ltlOriginArr) && count($commonValuesArr) == count($smallOriginArr)) {
@@ -340,27 +344,29 @@ class WweLTLManageAllQuotes
      */
     public function updateLtlQuotes($ltlQuotesArr, $minSmallRate)
     {
-        $WweLt = key($ltlQuotesArr);
-        $ltlQuotesArr = reset($ltlQuotesArr);
         $updatedLtlQuotesArr = [];
         if (!empty($ltlQuotesArr)) {
-            foreach ($ltlQuotesArr as $key => $value) {
-                $minSmallRate += $value['rate'];
+            foreach ($ltlQuotesArr as $moduleKey => $moduleRates) {
+                $finalRate = $minSmallRate;
+                foreach ($moduleRates as $originKey => $originRates) {
+                    $finalRate += $originRates['rate'];
+                }
+                $updatedLtlQuotesArr[$moduleKey][] = [
+                    'code' => $moduleKey . '_Freight',
+                    'title' => 'Freight ' . $this->resiLabel,
+                    'rate' => $finalRate
+                ];
             }
-            $updatedLtlQuotesArr[$WweLt][] = [
-                'code' => 'Freight',
-                'title' => 'Freight ' . $this->resiLabel,
-                'rate' => $minSmallRate
-            ];
         } else {
             foreach ($this->ltlPackagesQuotes as $key => $value) {
                 $updatedLtlQuotesArr[$key][] = [
-                    'code' => 'Freight',
+                    'code' => $key.'_Freight',
                     'title' => 'Freight',
                     'rate' => $minSmallRate
                 ];
             }
         }
+
         return $updatedLtlQuotesArr;
     }
 
@@ -393,16 +399,17 @@ class WweLTLManageAllQuotes
      * @param bool $isMultishipment
      * @return array
      */
-    public function wweLTLGetAllQuotes($getMinimum = false, $isMultishipment = false)
-    {
+    public function wweLTLGetAllQuotes(
+        $getMinimum = false,
+        $isMultishipment = false
+    ) {
         $helpersArr = $this->registry->registry('enitureHelpersCodes');
         $resultArr = [];
         foreach ($this->quotes as $key => $quote) {
             $helperId = $helpersArr[$key];
             $dataHelper = $this->objectManager->get("$helperId\Helper\Data");
             $smPkgResultData = $dataHelper->getQuotesResults($quote, $getMinimum, $isMultishipment, $this->scopeConfig);
-
-            if ($smPkgResultData != false && $smPkgResultData !== null) {
+            if ($smPkgResultData != false) {
                 $resultArr[$key] = $smPkgResultData;
             }
         }
@@ -410,22 +417,24 @@ class WweLTLManageAllQuotes
     }
 
     /**
-     * @param array $smallQuotesArr
-     * @param array $ltlQuotesArr
-     * @param array $minimumCommonArr
+     * @param $smallQuotesArr
+     * @param $ltlQuotesArr
+     * @param $minimumCommonArr
      */
     public function setOdwData($smallQuotesArr, $ltlQuotesArr, $minimumCommonArr)
     {
-        $smallQuotesArr = !empty($smallQuotesArr) ? reset($smallQuotesArr) : [];
-        $ltlQuotesArr = !empty($ltlQuotesArr) ? reset($ltlQuotesArr) : [];
+        $smallQuotesArr = $smallQuotesArr ?? [];
+        $ltlQuotesArr = $ltlQuotesArr ?? [];
         $allQuotesArr = $smallQuotesArr + $ltlQuotesArr;
-
         if (!empty($allQuotesArr)) {
-            foreach ($allQuotesArr as $origin => $data) {
-                $this->odwData[$origin] = $minimumCommonArr[$origin] ?? $data;
+            foreach ($allQuotesArr as $module => $moduleQuote) {
+                foreach ($moduleQuote as $origin => $data) {
+                    $this->odwData[$module][$origin] = $minimumCommonArr[$origin] ?? $data;
+                }
             }
-            $this->setOrderDetailData();
         }
+
+        $this->setOrderDetailData();
     }
 
     /**
@@ -434,9 +443,12 @@ class WweLTLManageAllQuotes
     public function setOrderDetailData()
     {
         $this->addQuotesIndex();
-        $orderDetail['residentialDelivery'] = 0;
         $setPkgForODWReg = $this->registry->registry('setPackageDataForOrderDetail') ?? [];
-        $orderDetail['shipmentData'] = array_replace_recursive($setPkgForODWReg, $this->odwData);
+
+        foreach ($this->odwData as $module => $odwDatum) {
+            $orderDetail[$module]['residentialDelivery'] = 0;
+            $orderDetail[$module]['shipmentData'] = array_replace_recursive($setPkgForODWReg, $odwDatum);
+        }
         // set order detail widget data
         $this->session->start();
         $this->session->setSemiOrderDetailSession($orderDetail);
@@ -445,35 +457,15 @@ class WweLTLManageAllQuotes
     public function addQuotesIndex()
     {
         $dataArray = [];
-        foreach ($this->odwData as $key => $array) {
-            $resi = $array['resi']['residential'] ?? false;
-            $this->resiLabel = $array['resi']['label'];
-            unset($array['resi']);
-            $array['residentialDelivery'] = $resi;
-            $dataArray[$key] = ['quotes' => $array];
-        }
-        $this->odwData = $dataArray;
-    }
-
-    /**
-     * This function gets quotes result from all active modules
-     * @param boolean $getMinimum
-     * @param bool $isMultiShipment
-     * @return array
-     */
-    public function wweGetAllQuotes($getMinimum = false, $isMultiShipment = false)
-    {
-        $helpersArr = $this->registry->registry('enitureHelpersCodes');
-        $resultArr = [];
-        foreach ($this->quotes as $key => $quote) {
-            $helperId = $helpersArr[$key];
-            $dataHelper = $this->objectManager->get("$helperId\Helper\Data");
-            $smPkgResultData = $dataHelper->getQuotesResults($quote, $getMinimum, $isMultiShipment, $this->scopeConfig);
-
-            if ($smPkgResultData != false && $smPkgResultData !== null) {
-                $resultArr[$key] = $smPkgResultData;
+        foreach ($this->odwData as $module => $moduleData) {
+            foreach ($moduleData as $key => $array) {
+                $resi = $array['resi']['residential'] ?? false;
+                $this->resiLabel = $array['resi']['label'];
+                unset($array['resi']);
+                $array['residentialDelivery'] = $resi;
+                $dataArray[$key] = ['quotes' => $array];
             }
+            $this->odwData[$module] = $dataArray;
         }
-        return $resultArr;
     }
 }

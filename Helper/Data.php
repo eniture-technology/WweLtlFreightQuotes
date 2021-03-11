@@ -15,6 +15,7 @@ use Magento\Framework\Registry;
 use Magento\Framework\Session\SessionManagerInterface;
 use Magento\Shipping\Model\Config;
 use Magento\Store\Model\ScopeInterface;
+use \Magento\Framework\ObjectManagerInterface;
 
 /**
  * Class Data
@@ -94,6 +95,8 @@ class Data extends AbstractHelper implements DataHelperInterface
      * */
     public $configSettings;
 
+    public $objectManager;
+
     /**
      * @param Context $context
      * @param Manager $moduleManager
@@ -105,6 +108,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      * @param Registry $registry
      * @param SessionManagerInterface $coreSession
      * @param Manager $cacheManager
+     * @param ObjectManagerInterface $objectmanager
      */
     public function __construct(
         Context $context,
@@ -116,7 +120,8 @@ class Data extends AbstractHelper implements DataHelperInterface
         Curl $curl,
         Registry $registry,
         SessionManagerInterface $coreSession,
-        Manager $cacheManager
+        Manager $cacheManager,
+        ObjectManagerInterface $objectmanager
     )
     {
         $this->moduleManager = $context->getModuleManager();
@@ -130,6 +135,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $this->registry = $registry;
         $this->coreSession = $coreSession;
         $this->cacheManager = $cacheManager;
+        $this->objectManager = $objectmanager;
         parent::__construct($context);
     }
 
@@ -221,7 +227,7 @@ class Data extends AbstractHelper implements DataHelperInterface
             'zip' => $inputData['zip'],
             'country' => $inputData['country'],
             'location' => $inputData['location'],
-            'nickname' => (isset($inputData['nickname'])) ? $inputData['nickname'] : '',
+            'nickname' => $inputData['nickname'] ?? '',
             'in_store' => 'null',
             'local_delivery' => 'null',
         ];
@@ -275,7 +281,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         unset($validateData['nickname']);
 
         foreach ($getWarehouse as $key => $value) {
-            if (empty($value) || is_null($value)) {
+            if (empty($value) || $value === null) {
                 $newData[$key] = 'empty';
             } else {
                 $oldData[$key] = trim($value);
@@ -489,10 +495,9 @@ class Data extends AbstractHelper implements DataHelperInterface
             }
         }
         $orderDetail['shipmentData'] = array_replace_recursive($setPkgForOrderDetailReg, $servicesArr);
-
         // set order detail widget data
         $this->coreSession->start();
-        $this->coreSession->setOrderDetailSession($orderDetail);
+        $this->coreSession->setWweLtlOrderDetailSession($orderDetail);
     }
 
     /**
@@ -609,7 +614,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $allConfigServices = $this->getAllConfigServicesArray($scopeConfig);
         $this->quoteSettingsData();
         if ($isMultiShipmentQuantity) {
-            return $this->getOriginsMinimumQuotes($quotes, $allConfigServices, $scopeConfig);
+            return $this->getOriginsMinimumQuotes($quotes, $allConfigServices);
         }
         $allQuotes = $odwArr = $hazShipmentArr = [];
         $count = 0;
@@ -674,7 +679,6 @@ class Data extends AbstractHelper implements DataHelperInterface
             }
             $count++;
         }
-
         $this->setOrderDetailWidgetData($odwArr, $hazShipmentArr);
         $allQuotes = $this->getFinalQuotesArray($allQuotes);
         if (!$this->isMultiShipment && isset($inStoreLdData) && !empty($inStoreLdData)) {
@@ -942,50 +946,47 @@ class Data extends AbstractHelper implements DataHelperInterface
     }
 
     /**
-     * @param array $quotes
+     * @param $quotes
+     * @param $allConfigServices
      * @return array
      */
-    public function getOriginsMinimumQuotes($quotes)
+    public function getOriginsMinimumQuotes($quotes, $allConfigServices)
     {
         $minIndexArr = [];
         $resiArr = ['residential' => false, 'label' => ''];
-        $hazShipment = $resi = '';
-        $counter = 0;
-        $plan = $this->planInfo()['planNumber'];
-
-        foreach ($quotes as $origin => $quote) {
-            if (isset($quote->severity)) {
-                return [];
+        foreach ($quotes as $key => $quote) {
+            $minInQ = [];
+            $counter = 0;
+            $isRad = $quote->autoResidentialsStatus ?? '';
+            $autoResTitle = $this->getAutoResidentialTitle($isRad);
+            if ($this->residentialDlvry == "1" || $autoResTitle != '') {
+                $resiArr = ['residential' => true, 'label' => $autoResTitle];
             }
-
-            if ($counter == 0) { //To be checked only once
-                $isRad = $quote->autoResidentialsStatus ?? '';
-                $this->getAutoResidentialTitle($isRad);
-                $resi = $this->isResi ? $this->resiLabel : '';
-                if ($this->residentialDlvry || $this->isResi) {
-                    $resiArr = ['residential' => true, 'label' => $resi];
-                }
-            }
-
             if (isset($quote->q)) {
-                if ($plan > 1 && isset($quote->hazardousStatus)) {
-                    $hazShipmentArr[$origin] = $quote->hazardousStatus == 'y' ? 'Y' : 'N';
-                }
-
-                foreach ($quote as $key => $data) {
-                    if (isset($data->serviceType)) {
+                foreach ($quote->q as $serKey => $availSer) {
+                    if (isset($availSer->serviceType) && in_array($availSer->serviceType, $allConfigServices)) {
+                        //$liftGateCharge     = $this->getLiftgateCost($availSer);
+                        //$totalCost          = $this->calculateHandlingFee($rate);
+                        $totalCost          = $this->calculatePrice($availSer, false, true);
                         $currentArray = [
-                            'code' => 'WWEFREIGHT',
-                            'rate' => $this->calculatePrice($data, false, true),
-                            'title' => $this->labelAs . ' ' . $resi,
-                            'resi' => $resiArr,
-                            'hazShipment' => $hazShipment];
-
-                        $counter++;
+                            'code'=> str_replace('_', '', $availSer->serviceType),
+                            'rate' => $totalCost,
+                            'title' => $this->labelAs . $autoResTitle,
+                            'resi' => $resiArr
+                        ];
+                        if ($counter == 0) {
+                            $minInQ = $currentArray;
+                        } else {
+                            $minInQ = ($currentArray['rate'] < $minInQ['rate'] ? $currentArray : $minInQ);
+                        }
+                        $counter ++;
                     }
                 }
+                if ($minInQ['rate'] > 0) {
+                    $minIndexArr[$key] = $minInQ;
+                }
             }
-            $minIndexArr[$origin] = $currentArray;
+            $minIndexArr[$key] = $currentArray;
         }
         return $minIndexArr;
     }
@@ -1328,5 +1329,16 @@ class Data extends AbstractHelper implements DataHelperInterface
                 break;
         }
         return $restriction;
+    }
+
+    public function getBoxHelper($objectName)
+    {
+        if ($objectName == 'helper') {
+            return $this->objectManager->get("Eniture\StandardBoxSizes\Helper\Data");
+        }
+        if ($objectName == 'boxFactory') {
+            $boxHelper =  $this->objectManager->get("Eniture\StandardBoxSizes\Helper\Data");
+            return $boxHelper->getBoxFactory();
+        }
     }
 }

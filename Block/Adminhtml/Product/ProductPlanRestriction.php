@@ -65,6 +65,7 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
         $numLTL = $numSmPkg = $hazEn = $insEn = 0;
         $hazmat = $insurance = 'Disabled';
         $activeCarriers = array_keys($this->shipconfig->getActiveCarriers());
+
         foreach ($activeCarriers as $carrierCode) {
             $enCarrier = substr($carrierCode, 0, 2);
             if ($enCarrier == 'EN') {
@@ -87,7 +88,9 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
                 }
                 if ($numLTL) {
                     $restriction['data'][$carrierCode]['hazmat'] = $hazmat;
-                } elseif ($numSmPkg) {
+                }
+                //elseif ($numSmPkg) old condition
+                if ($numSmPkg) {
                     if ($carrierPlan > 1) {
                         $insEn++;
                     }

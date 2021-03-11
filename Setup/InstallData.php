@@ -15,7 +15,6 @@ use Magento\Eav\Model\Config;
 use Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface;
 use Magento\Eav\Setup\EavSetupFactory;
 use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
-use Magento\Framework\App\ProductMetadataInterface;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\DB\Ddl\Table;
 use Magento\Framework\Exception\LocalizedException;
@@ -52,14 +51,6 @@ class InstallData implements InstallDataInterface
      */
     private $connection;
     /**
-     * @var Magento Version
-     */
-    private $mageVersion;
-    /**
-     * @var ProductMetadataInterface
-     */
-    private $productMetadata;
-    /**
      * @var CollectionFactory
      */
     public $collectionFactory;
@@ -91,12 +82,15 @@ class InstallData implements InstallDataInterface
      * @var Config
      */
     private $eavConfig;
+    /**
+     * @var $haveTsAttributes
+     */
+    private $haveTsAttributes = false;
 
     /**
      * InstallData constructor.
      * @param EavSetupFactory $eavSetupFactory
      * @param State $state
-     * @param ProductMetadataInterface $productMetadata
      * @param CollectionFactory $collectionFactory
      * @param ProductFactory $productLoader
      * @param ResourceConnection $resource
@@ -108,7 +102,6 @@ class InstallData implements InstallDataInterface
     public function __construct(
         EavSetupFactory $eavSetupFactory,
         State $state,
-        ProductMetadataInterface $productMetadata,
         CollectionFactory $collectionFactory,
         ProductFactory $productLoader,
         ResourceConnection $resource,
@@ -120,12 +113,10 @@ class InstallData implements InstallDataInterface
     {
         $this->eavSetupFactory = $eavSetupFactory;
         $this->state = $state;
-        $this->productMetadata = $productMetadata;
         $this->collectionFactory = $collectionFactory;
         $this->productLoader = $productLoader;
         $this->resource = $resource;
         $this->connection = $resource->getConnection(ResourceConnection::DEFAULT_CONNECTION);
-        $this->mageVersion = $this->productMetadata->getVersion();
         $this->curl = $curl;
         $this->resourceConfig = $resourceConfig;
         $this->planUpgrade = $planUpgrade;
@@ -181,18 +172,11 @@ class InstallData implements InstallDataInterface
      */
     public function attrNames()
     {
-        $dimAttr = [
+        $this->attrNames = [
             'length' => 'length',
-            'width' => 'width',
-            'height' => 'height',
-            'ltl_check' => 'ltl_check',
+            'width'  => 'width',
+            'height' => 'height'
         ];
-        $dsAttr = [
-            'dropship' => 'dropship',
-            'dropship_location' => 'dropship_location'
-        ];
-
-        $this->attrNames = ($this->mageVersion >= '2.2.5') ? $dsAttr : array_merge($dsAttr, $dimAttr);
     }
 
     /**
@@ -200,23 +184,21 @@ class InstallData implements InstallDataInterface
      */
     public function renameOldAttributes()
     {
-        if ($this->mageVersion < '2.2.5') {
-            $attributes = $this->attrNames;
-            foreach ($attributes as $key => $attr) {
-                $selectSql = "SELECT count(*) AS count FROM " . $this->tableNames['eav_attribute'] . " WHERE attribute_code = 'wwe_" . $attr . "'";
-                $isExist = $this->connection->fetchOne($selectSql);
-                if ($isExist == 1) {
-                    $updateSql = "UPDATE " . $this->tableNames['eav_attribute'] . " SET attribute_code = 'en_" . $attr . "', is_required = 0 WHERE attribute_code = 'wwe_" . $attr . "'";
-                    $this->connection->query($updateSql);
-                }
-            }
-        } else {
-            $selectSql = "SELECT count(*) AS count FROM " . $this->tableNames['eav_attribute'] . " WHERE attribute_code = 'wwe_ltl_check'";
+        foreach ($this->attrNames as $key => $attr) {
+            $selectSql = "SELECT count(*) AS count FROM " . $this->tableNames['eav_attribute'] . " WHERE attribute_code = 'wwe_" . $attr . "'";
             $isExist = $this->connection->fetchOne($selectSql);
             if ($isExist == 1) {
-                $updateSql = "UPDATE " . $this->tableNames['eav_attribute'] . " SET attribute_code = 'en_ltl_check', is_required = 0 WHERE attribute_code = 'wwe_ltl_check'";
+                $updateSql = "UPDATE " . $this->tableNames['eav_attribute'] . " SET attribute_code = 'en_" . $attr . "', is_required = 0 WHERE attribute_code = 'wwe_" . $attr . "'";
                 $this->connection->query($updateSql);
             }
+        }
+
+
+        $selectSql = "SELECT count(*) AS count FROM " . $this->tableNames['eav_attribute'] . " WHERE attribute_code = 'wwe_ltl_check'";
+        $isExist = $this->connection->fetchOne($selectSql);
+        if ($isExist == 1) {
+            $updateSql = "UPDATE " . $this->tableNames['eav_attribute'] . " SET attribute_code = 'en_ltl_check', is_required = 0 WHERE attribute_code = 'wwe_ltl_check'";
+            $this->connection->query($updateSql);
         }
 
         $isspeedFreightExist = $this->connection->fetchOne("select count(*) as count From " . $this->tableNames['eav_attribute'] . " where attribute_code = 'speedFraightClass'");
@@ -258,27 +240,33 @@ class InstallData implements InstallDataInterface
         $eavSetup
     )
     {
-        $attributes = $this->attrNames;
-        if ($this->mageVersion < '2.2.5') {
-            unset($attributes['dropship'], $attributes['dropship_location']);
-            $count = 65;
-            foreach ($attributes as $key => $attr) {
-                $isExist = $this->eavConfig
-                    ->getAttribute('catalog_product', 'en_' . $attr . '')->getAttributeId();
-                if ($isExist == null) {
-                    $this->getAttributeArray(
-                        $eavSetup,
-                        'en_' . $attr,
-                        Table::TYPE_DECIMAL,
-                        ucfirst($attr),
-                        'text',
-                        '',
-                        $count
-                    );
+        $count = 65;
+        foreach ($this->attrNames as $key => $attr) {
+            if($attr == 'length' || $attr == 'width' || $attr == 'height'){
+                $isTsAttExists = $this->eavConfig
+                    ->getAttribute('catalog_product', 'ts_dimensions_' . $attr . '')->getAttributeId();
+                if($isTsAttExists != null){
+                    $this->haveTsAttributes = true;
+                    continue;
                 }
-                $count++;
             }
+            $isExist = $this->eavConfig
+                ->getAttribute('catalog_product', 'en_' . $attr . '')->getAttributeId();
+            if ($isExist == null) {
+                $this->getAttributeArray(
+                    $eavSetup,
+                    'en_' . $attr,
+                    Table::TYPE_DECIMAL,
+                    ucfirst($attr),
+                    'text',
+                    '',
+                    $count,
+                    'validate-number validate-greater-than-zero'
+                );
+            }
+            $count++;
         }
+
 
         $isLTLCheckExist = $this->connection->fetchOne("select count(*) as count From " . $this->tableNames['eav_attribute'] . " where attribute_code = 'en_ltl_check'");
 
@@ -537,7 +525,7 @@ class InstallData implements InstallDataInterface
     {
         $lengthChange = $widthChange = $heightChange = false;
 
-        if ($this->mageVersion > '2.2.4') {
+        if ($this->haveTsAttributes) {
             $productCollection = $this->collectionFactory->create()->addAttributeToSelect('*');
             foreach ($productCollection as $_product) {
                 $product = $this->productLoader->create()->load($_product->getEntityId());

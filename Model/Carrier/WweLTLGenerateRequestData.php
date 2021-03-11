@@ -25,6 +25,10 @@ class WweLTLGenerateRequestData
      * @var object
      */
     private $scopeConfig;
+    /**
+     * @var dataHelper
+     */
+    public $dataHelper;
 
     private $appConfigData = [];
 
@@ -34,18 +38,21 @@ class WweLTLGenerateRequestData
      * @param $registry
      * @param $moduleManager
      * @param $request
+     * @param $dataHelper
      */
     public function _init(
         $scopeConfig,
         $registry,
         $moduleManager,
-        $request
+        $request,
+        $dataHelper
     )
     {
         $this->registry = $registry;
         $this->scopeConfig = $scopeConfig;
         $this->moduleManager = $moduleManager;
         $this->request = $request;
+        $this->dataHelper = $dataHelper;
     }
 
     /**
@@ -61,7 +68,7 @@ class WweLTLGenerateRequestData
             'carrierMode' => 'pro', //$this->getConfigData('WweltlAccessLevel')
             'quotestType' => 'ltl', // ltl / small
             'version' => '1.0.0',
-            'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds'),
+            'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 10 : 0,
             'liftGateAsAnOption' => $this->getConfigData('OfferLiftgateAsAnOption'),
             'api' => $this->getApiInfoArr(),
             'getDistance' => $getDistance,
@@ -126,20 +133,28 @@ class WweLTLGenerateRequestData
             }
         }
         $smartPost = $this->registry->registry('fedexSmartPost');
+        $fedexOneRatePricing = $this->registry->registry('FedexOneRatePricing');
 
-        return [
+        $requestArr = [
             'apiVersion' => '2.0',
             'platform' => 'magento2',
             'binPackagingMultiCarrier' => $this->binPackSuspend(),
             'autoResidentials' => $autoResidential,
             'liftGateWithAutoResidentials' => $liftGateWithAuto,
-            'FedexOneRatePricing' => $smartPost,
+            'FedexOneRatePricing' => $fedexOneRatePricing,
             'FedexSmartPostPricing' => $smartPost,
             'requestKey' => $cart->getQuote()->getId(),
             'carriers' => $carriers,
             'receiverAddress' => $receiverAddress,
             'commdityDetails' => $itemsArr,
         ];
+
+        if ($this->moduleManager->isEnabled('Eniture_StandardBoxSizes')) {
+            $binsData = $this->getSavedBins();
+            $requestArr = array_merge($requestArr, isset($binsData) ? $binsData : []);
+        }
+
+        return  $requestArr;
     }
 
     /**
@@ -148,7 +163,7 @@ class WweLTLGenerateRequestData
     public function binPackSuspend()
     {
         $return = "0";
-        if ($this->moduleManager->isEnabled('Eniture_BoxSizes')) {
+        if ($this->moduleManager->isEnabled('Eniture_StandardBoxSizes')) {
             $return = $this->scopeConfig->getValue("binPackaging/suspend/value", ScopeInterface::SCOPE_STORE) == "no" ? "1" : "0";
         }
         return $return;
@@ -380,5 +395,15 @@ class WweLTLGenerateRequestData
             }
         }
         return $getMilesGoogleApi;
+    }
+
+    public function getSavedBins()
+    {
+        $savedBins = [];
+        if ($this->moduleManager->isEnabled('Eniture_StandardBoxSizes')) {
+            $boxSizeHelper = $this->dataHelper->getBoxHelper('helper');
+            $savedBins = $boxSizeHelper->fillBoxingData();
+        }
+        return $savedBins;
     }
 }

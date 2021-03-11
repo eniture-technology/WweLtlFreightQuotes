@@ -45,7 +45,7 @@ require([ 'jquery'],(function ($) {
     this.placeholderText = element.hasAttribute('placeholder') ? this.$element.attr('placeholder') : '';
     this.inputSize = Math.max(1, this.placeholderText.length);
 
-    this.$container = $('<div class="bootstrap-tagsinput"></div>');
+    this.$container = $('<div class="bootstrap-tagsinput" ></div>');
     this.$input = $('<input type="text" maxlength="7" placeholder="' + this.placeholderText + '"/>').appendTo(this.$container);
     this.$element.before(this.$container);
 

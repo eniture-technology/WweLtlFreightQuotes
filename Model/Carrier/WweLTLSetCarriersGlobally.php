@@ -52,6 +52,7 @@ class WweLTLSetCarriersGlobally
         }
 
         $activeEnModulesCount = $this->getActiveEnitureModulesCount();
+
         if (count($this->registry->registry('enitureCarriers')) < $activeEnModulesCount) {
             return false;
         } else {
