@@ -267,8 +267,13 @@ class WweLTLShipping extends AbstractCarrier implements
             $_product = $this->productLoader->create()->load($item->getProductId());
             $productType = $item->getRealProductType() ?? $_product->getTypeId();
 
-            if ($productType == 'simple' || $productType == 'configurable') {
-                $productQty = $item->getQty();
+            if ($productType == 'configurable') {
+                $this->qty = $item->getQty();
+            }
+            if ($productType == 'simple') {
+                $productQty = ($this->qty > 0) ? $this->qty : $item->getQty();
+                $this->qty = 0;
+
                 $originAddress = $this->shipmentPkg->wweLTLOriginAddress($request, $_product, $receiverZipCode);
                 $package['origin'][$_product->getId()] = $originAddress;
 
