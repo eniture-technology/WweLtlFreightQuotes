@@ -85,8 +85,14 @@ class WweLTLShipping extends AbstractCarrier implements
      * @var WweLTLSetCarriersGlobally
      */
     private $setGlobalCarrier;
-
+    /**
+     * @var isHazmat
+     */
     private $isHazmat = 'N';
+    /**
+     * @var qty
+     */
+    public $qty = 0;
 
     /**
      * @param ScopeConfigInterface $scopeConfig
