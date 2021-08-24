@@ -67,7 +67,7 @@ class WweLTLGenerateRequestData
             'serverName' => $this->request->getServer('SERVER_NAME'),
             'carrierMode' => 'pro', //$this->getConfigData('WweltlAccessLevel')
             'quotestType' => 'ltl', // ltl / small
-            'version' => '1.0.0',
+            'version' => '2.0.8',
             'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 10 : 0,
             'liftGateAsAnOption' => $this->getConfigData('OfferLiftgateAsAnOption'),
             'api' => $this->getApiInfoArr(),
@@ -281,7 +281,7 @@ class WweLTLGenerateRequestData
      */
     public function getConfigData($fieldId)
     {
-        $secThreeIds = ['residentialDlvry', 'liftGate', 'weightExeeds', 'offerLiftGate', 'RADforLiftgate','OfferLiftgateAsAnOption'];
+        $secThreeIds = ['residentialDlvry', 'liftGate', 'weightExeeds', 'offerLiftGate', 'RADforLiftgate','OfferLiftgateAsAnOption', 'insuranceCategory'];
         if (in_array($fieldId, $secThreeIds)) {
             $sectionId = 'WweLtQuoteSetting';
             $groupId = 'third';
@@ -405,5 +405,21 @@ class WweLTLGenerateRequestData
             $savedBins = $boxSizeHelper->fillBoxingData();
         }
         return $savedBins;
+    }
+
+    public function getInsuranceCategory(){
+        $insureCat = $this->getConfigData('insuranceCategory');
+        if(empty($insureCat)){
+            $insuranceCatArr = [
+                'code' => '84',
+                'value' => 'General Merchandise'
+            ];
+        }else{
+            $insuranceCatArr = [
+                'code' => $insureCat,
+                'value' => $insureCat
+            ];
+        }
+        return $insuranceCatArr;
     }
 }

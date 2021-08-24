@@ -10,12 +10,12 @@ use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\HTTP\Client\Curl;
-use Magento\Framework\Module\Manager;
 use Magento\Framework\Registry;
 use Magento\Framework\Session\SessionManagerInterface;
 use Magento\Shipping\Model\Config;
 use Magento\Store\Model\ScopeInterface;
 use \Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\App\Cache\Manager;
 
 /**
  * Class Data
@@ -639,8 +639,10 @@ class Data extends AbstractHelper implements DataHelperInterface
                 if (isset($quote->hazardousStatus)) {
                     $hazShipmentArr[$origin] = $quote->hazardousStatus == 'y' ? 'Y' : 'N';
                 }
+
                 foreach ($quote->q as $key => $data) {
-                    if (isset($data->serviceType) && in_array($data->serviceType, $allConfigServices)) {
+                    if (isset($data->serviceType) && in_array($data->serviceType, $allConfigServices)
+                    && (empty($data->GuaranteedDaysToDelivery) || $data->GuaranteedDaysToDelivery != 'Y')) {
                         $access = $this->getAccessorialCode();
                         $price = $this->calculatePrice($data);
                         $title = $this->getTitle($data->serviceDesc, false, false, $data->transitTime);
@@ -684,6 +686,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         if (!$this->isMultiShipment && isset($inStoreLdData) && !empty($inStoreLdData)) {
             $allQuotes = $this->inStoreLocalDeliveryQuotes($allQuotes, $inStoreLdData);
         }
+
         return $this->arrangeOwnFreight($allQuotes);
     }
 
@@ -1203,7 +1206,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      * @param bool $type
      * @return array
      */
-    public function generateResponse($msg = null, $type = false)
+    public function generateResponse($msg = null, $type = true)
     {
         $defaultError = 'Something went wrong. Please try again!';
         return [
@@ -1297,6 +1300,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         if ($this->ownArangement == 0 || $this->ratingMethod == 3) {
             return $finalQuotes;
         }
+        $ownArrangement = [];
         $ownArrangement[] = [
             'code' => 'ownArrangement',
             'title' => (!empty($this->ownArangementText)) ? $this->ownArangementText : "I'll Arrange My Own Freight",

@@ -35,6 +35,7 @@
                 </span>
                     </div>
                     <?php
+                    
                     if (isset($order['quotes']['code'])) {
                         if (stripos($order['quotes']['code'], "HOAT") === false) {
                             $residential = ($orderDetailData['residentialDelivery'] || $resi) ? 'Residential Delivery' : false;
@@ -49,7 +50,10 @@
                     $findHazardous = array_column($lineItems, 'isHazmatLineItem');
                     $hazardous = (in_array("Y", $findHazardous)) ? 'Hazardous Material' : '';
 
-                    if ($residential || $hazardous || $liftGate) { ?>
+                    $findInsuredItems = array_column($lineItems, 'product_insurance_active');
+                    $insurance = (in_array("1", $findInsuredItems)) ? 'Insurance' : '';
+
+                    if ($residential || $hazardous || $liftGate || $insurance) { ?>
                         <h4 class='order-detail-hdng'>Additional Information</h4>
                         <div class="order-additionalInfo-block">
                             <?php
@@ -64,6 +68,14 @@
                                 <span class="list-item">
                                     <?= /* @noEscape */
                                     __($hazardous) ?>
+                                    </span>
+
+                            <?php }
+
+                            if ($insurance) { ?>
+                                <span class="list-item">
+                                    <?= /* @noEscape */
+                                    __($insurance) ?>
                                     </span>
 
                             <?php }

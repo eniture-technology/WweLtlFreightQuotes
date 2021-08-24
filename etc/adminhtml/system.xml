@@ -163,6 +163,12 @@
                     <frontend_model>Eniture\WweLtlFreightQuotes\Block\System\Config\RADforLiftgate</frontend_model>
                 </field>
 
+                <field id="insuranceCategory" translate="label" type="select" sortOrder="21" showInDefault="1"
+                       showInWebsite="1" showInStore="1">
+                    <label>Insurance Category</label>
+                    <source_model>Eniture\WweLtlFreightQuotes\Model\Source\WweLTLInsuranceCategory</source_model>
+                </field>
+
                 <field id="hndlngFee" translate="label" type="text" sortOrder="22" showInDefault="1" showInWebsite="1"
                        showInStore="1">
                     <label>Handling Fee / Markup</label>

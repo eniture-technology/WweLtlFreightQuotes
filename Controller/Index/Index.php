@@ -47,6 +47,7 @@ class Index extends Action
     public function execute()
     {
         $params = $this->request->getParams();
+
         if (!empty($params)) {
             $plan = isset($params['pakg_group']) ? $params['pakg_group'] : '';
             $expireDay = isset($params['pakg_duration']) ? $params['pakg_duration'] : '';

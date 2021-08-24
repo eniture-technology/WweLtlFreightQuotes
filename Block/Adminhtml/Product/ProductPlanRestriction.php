@@ -42,7 +42,6 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
     {
         parent::_prepareLayout();
         if (!$this->getTemplate()) {
-            echo 'asdfasdfasdfasdfasdfasdfasdf';
             $this->setTemplate(static::PRODUCT_TEMPLATE);
         }
         return $this;
@@ -90,17 +89,17 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
                     $restriction['data'][$carrierCode]['hazmat'] = $hazmat;
                 }
                 //elseif ($numSmPkg) old condition
-                if ($numSmPkg) {
+//                if ($numSmPkg) {
                     if ($carrierPlan > 1) {
                         $insEn++;
                     }
                     $restriction['data'][$carrierCode]['hazmat'] = $hazmat;
                     $restriction['data'][$carrierCode]['insurance'] = $insurance;
-                }
+//                }
             }
         }
         $restriction['hazCount'] = $numSmPkg + $numLTL;
-        $restriction['insCount'] = $numSmPkg;
+        $restriction['insCount'] = $numSmPkg + $numLTL;
         $restriction['hazEnCount'] = $hazEn;
         $restriction['insEnCount'] = $insEn;
         return $restriction;

@@ -99,7 +99,6 @@ function WweLtGetAddressFromZip(ajaxUrl, $this, callfunction) {
         return false;
     }
     const parameters = {'origin_zip': zipCode};
-
     WweLtAjaxRequest(parameters, ajaxUrl, callfunction);
 }
 
@@ -124,13 +123,13 @@ function validateDecimal($, value, limit) {
     let pattern;
     switch (limit) {
         case 4:
-            pattern = /^\d*(\.\d{0,4})?$/;
+            pattern = /^[+-]?\d*(\.\d{0,4})?$/;
             break;
         case 3:
-            pattern = /^\d*(\.\d{0,3})?$/;
+            pattern = /^[+-]?\d*(\.\d{0,3})?$/;
             break;
         default:
-            pattern = /^\d*(\.\d{0,2})?$/;
+            pattern = /^[+-]?\d*(\.\d{0,2})?$/;
             break;
     }
     let regex = new RegExp(pattern, 'g');
@@ -167,7 +166,6 @@ function WweLtConnSettingsNote($) {
 }
 
 function WweLtCurrentPlanNote($, planMsg, carrierDiv) {
-    console.log('pride');
     let divAfter = '<div class="message message-notice notice WweLt-plan-note"><div data-ui-id="messages-message-notice">' + planMsg + '</div></div>';
     WweLtNotesToggleHandling($, divAfter, '.WweLt-plan-note', carrierDiv);
 }

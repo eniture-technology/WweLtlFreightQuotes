@@ -368,6 +368,20 @@ class InstallData implements InstallDataInterface
             );
         }
 
+        $isInsurance = $this->eavConfig->getAttribute('catalog_product', 'en_insurance')->getAttributeId();
+
+        if ($isInsurance == null) {
+            $this->getAttributeArray(
+                $eavSetup,
+                'en_insurance',
+                'int',
+                'Insure this item',
+                'select',
+                'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
+                73
+            );
+        }
+
         $installer->endSetup();
     }
 

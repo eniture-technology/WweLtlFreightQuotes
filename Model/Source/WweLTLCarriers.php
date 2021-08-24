@@ -27,6 +27,8 @@ class WweLTLCarriers
 
                 ['value' => 'BEAV',  'label'  => __('Beaver Express Service, LLC')],
 
+                ['value' => 'BRTC',  'label'  => __('BC Freightways')],
+
                 ['value' => 'BTVP',  'label'  => __('Best Overnite Express')],
 
                 ['value' => 'CAZF',  'label'  => __('Central Arizona Freight Lines')],
@@ -42,6 +44,8 @@ class WweLTLCarriers
                 ['value' => 'CTII',  'label'  => __('Central Transport')],
 
                 ['value' => 'CXRE',  'label'  => __('Cal State Express')],
+
+                ['value' => 'CGOJ',  'label'  => __('Cargomatic')],
 
                 ['value' => 'DAFG',  'label'  => __('Dayton Freight')],
 
@@ -128,6 +132,10 @@ class WweLTLCarriers
                 ['value' => 'WTVA',  'label'  => __('Wilson Trucking Corporation')],
 
                 ['value' => 'RDWY',  'label'  => __('YRC')],
+
+                ['value' => 'CTBV',  'label'  => __('Custom Companies')],
+
+                ['value' => 'MTJG',  'label'  => __('Moran Transportation')]
 
         ];
     }

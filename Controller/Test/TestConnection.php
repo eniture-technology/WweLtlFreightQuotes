@@ -64,14 +64,14 @@ class TestConnection extends Action
         $errorMsg = 'The credentials entered did not result in a successful test. Confirm your credentials and try again.';
         if (isset($data)) {
             if (isset($data->error)) {
-                $response = $this->dataHelper->generateResponse($data->error_desc, false);
+                $response = $this->dataHelper->generateResponse($data->error_desc, true);
                 if (isset($data->error->Code)) {
-                    $response = $this->dataHelper->generateResponse($data->error->Description, false);
+                    $response = $this->dataHelper->generateResponse($data->error->Description, true);
                 }
             } elseif (isset($data->success)) {
                 $response['msg'] = $successMsg;
             } elseif ($data->status == 'Error') {
-                $response = $this->dataHelper->generateResponse($data->error_desc, false);
+                $response = $this->dataHelper->generateResponse($data->error_desc, true);
             }
         } else {
             $response = $this->dataHelper->generateResponse();

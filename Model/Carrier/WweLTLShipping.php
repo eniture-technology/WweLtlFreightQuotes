@@ -90,6 +90,11 @@ class WweLTLShipping extends AbstractCarrier implements
      */
     private $isHazmat = 'N';
     /**
+     * @var isInsure
+     */
+    private $isInsure = false;
+
+    /**
      * @var qty
      */
     public $qty = 0;
@@ -196,10 +201,11 @@ class WweLTLShipping extends AbstractCarrier implements
         }
         $ItemsList = $request->getAllItems();
         $receiverZipCode = $request->getDestPostcode();
-        $package = $this->getShipmentPackageRequest($ItemsList, $receiverZipCode, $request);
-
+        $planInfo = $this->dataHelper->planInfo();
+        $package = $this->getShipmentPackageRequest($ItemsList, $receiverZipCode, $request, $planInfo);
         $wweLtlArr = $this->generateReqData->generateEnitureArray();
-        if ($this->isHazmat == 'Y'){
+
+        if ($planInfo['planNumber'] >= 2 && $this->isHazmat == 'Y'){
             $wweLtlArr['api']['lineItemHazmatInfo'] = [
                 [
                     'isHazmatLineItem' => 'Y',
@@ -211,6 +217,12 @@ class WweLTLShipping extends AbstractCarrier implements
                 ],
             ];
         }
+
+        if($planInfo['planNumber'] >= 2 && $this->isInsure){
+            $wweLtlArr['api']['insureShipment'] = '1';
+            $wweLtlArr['api']['insuranceCategory'] = $this->generateReqData->getInsuranceCategory();
+        }
+
         $wweLtlArr['originAddress'] = $package['origin'];
         $resp = $this->setGlobalCarrier->manageCarriersGlobally($wweLtlArr, $this->registry);
         if (!$resp) {
@@ -266,7 +278,7 @@ class WweLTLShipping extends AbstractCarrier implements
      * @param $request
      * @return array
      */
-    public function getShipmentPackageRequest($items, $receiverZipCode, $request)
+    public function getShipmentPackageRequest($items, $receiverZipCode, $request, $planInfo)
     {
         $package = [];
         foreach ($items as $item) {
@@ -281,6 +293,7 @@ class WweLTLShipping extends AbstractCarrier implements
                 $this->qty = 0;
 
                 $originAddress = $this->shipmentPkg->wweLTLOriginAddress($request, $_product, $receiverZipCode);
+
                 $package['origin'][$_product->getId()] = $originAddress;
 
                 $orderWidget[$originAddress['senderZip']]['origin'] = $originAddress;
@@ -290,7 +303,7 @@ class WweLTLShipping extends AbstractCarrier implements
                 $width = $this->getDims($_product, 'width');
                 $height = $this->getDims($_product, 'height');
 
-                $setHzAndIns = $this->setHzAndIns($_product);
+                $setHzAndIns = $this->setHzAndIns($_product, $planInfo);
                 $lineItemClass = $this->getLineItemClass($_product);
                 $lineItem = [
                     'lineItemClass' => $lineItemClass,
@@ -304,7 +317,7 @@ class WweLTLShipping extends AbstractCarrier implements
                     'lineItemWidth' => number_format($width, 2, '.', ''),
                     'lineItemHeight' => number_format($height, 2, '.', ''),
                     'isHazmatLineItem' => $setHzAndIns['hazmat'],
-                    'product_insurance_active' => $setHzAndIns['insurance'],
+                    'product_insurance_active' => ($setHzAndIns['insurance'])?'1':'0',
                     'shipBinAlone' => $_product->getData('en_own_package'),
                     'vertical_rotation' => $_product->getData('en_vertical_rotation'),
                 ];
@@ -406,13 +419,28 @@ class WweLTLShipping extends AbstractCarrier implements
      * @param object $_product
      * @return array
      */
-    private function setHzAndIns($_product)
+    private function setHzAndIns($_product, $planInfo)
     {
-        $hazmat = $this->isHazmat = ($_product->getData('en_hazmat')) ? 'Y' : 'N';
-        $insurance = $_product->getData('en_insurance');
-        if ($insurance && $this->registry->registry('en_insurance') === null) {
-            $this->registry->register('en_insurance', $insurance);
+        if ($planInfo['planNumber'] >= 2 && $_product->getData('en_hazmat')){
+            $hazmat = 'Y';
+        }else{
+            $hazmat = 'N';
         }
+
+        if ($planInfo['planNumber'] >= 2 && $_product->getData('en_insurance')){
+            $insurance = true;
+        }else{
+            $insurance = false;
+        }
+
+        if($hazmat == 'Y' && $this->isHazmat != 'Y'){
+            $this->isHazmat = 'Y';
+        }
+
+        if($insurance && !$this->isInsure){
+            $this->isInsure = true;
+        }
+
         return ['hazmat' => $hazmat,
             'insurance' => $insurance
         ];

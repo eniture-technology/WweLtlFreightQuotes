@@ -14,7 +14,7 @@ class PlanUpgrade
     /**
      * @var String URL
      */
-    private $curlUrl = 'https://eniture.com/ws/web-hooks/subscription-plans/create-plugin-webhook.php';
+    private $curlUrl = 'https://ws011.eniture.com/web-hooks/subscription-plans/create-plugin-webhook.php';
     /**
      * @var Logger Object
      */
@@ -59,7 +59,8 @@ class PlanUpgrade
         $webhookUrl = $domain . 'wweltlfreightquotes';
         $postData = http_build_query([
             'platform' => 'magento2',
-            'carrier' => '68',
+//            'carrier' => '68',
+            'carrier' => '11',
             'store_url' => $domain,
             'webhook_url' => $webhookUrl,
         ]);
