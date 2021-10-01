@@ -160,7 +160,7 @@ function validateAlphaNumOnly($, element) {
  * Display connection setting fedex account note
  */
 function WweLtConnSettingsNote($) {
-    var divAfter = '<div class="message message-notice notice conn-setting-note"><div data-ui-id="messages-message-notice">You must have a WorldWide Express account to use this application. If you do not have one contact WorldWide Express at 800-734-5351 or <a target="_blank" href="https://eniture.com/request-worldwide-express-account-number/">register online</a>.</div>';
+    var divAfter = '<div class="message message-notice notice conn-setting-note"><div data-ui-id="messages-message-notice">You must have a Worldwide Express account to use this application. If you do not have one, click <a target="_blank" href="https://eniture.com/request-worldwide-express-account-number/">here</a> to access the new account request form.</div>';
     var carrierDiv = '#WweLtConnSettings_first-head';
     WweLtNotesToggleHandling($, divAfter, '.conn-setting-note', carrierDiv);
 }

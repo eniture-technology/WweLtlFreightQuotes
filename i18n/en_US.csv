@@ -1,5 +1,5 @@
 "Click <a href=""%1"" target=""_blank"">here</a> to add the Standard Box Sizes module. (<a href=""%1"" target=""_blank"">Learn more</a>)","Click <a href=""""%1"""" target=""""_blank"""">here</a> to add the Standard Box Sizes module. (<a href=""""%1"""" target=""""_blank"""">Learn more</a>)"
-Drop Ships,Drop Ships
+Drop ships,Drop ships
 Worldwide Express LTL Freight Quotes,Worldwide Express LTL Freight Quotes
 "Warning! If you delete this location, Drop ship location settings will be disable against products.","Warning! If you delete this location, Drop ship location settings will be disable against products."
 Cancel,Cancel
@@ -14,7 +14,7 @@ State,State
 Zip,Zip
 Country,Country
 Action,Action
-Drop Ship,Drop Ship
+Drop ship,Drop ship
 Error!,Error!
 Drop ship already exists.,Drop ship already exists.
 Please select US or CA address.,Please select US or CA address.
@@ -49,7 +49,7 @@ Best Overnite Express,Best Overnite Express
 Central Arizona Freight Lines,Central Arizona Freight Lines
 "Central Freight Lines, Inc","Central Freight Lines, Inc"
 Clear Lane Freight Systems,Clear Lane Freight Systems
-Con-Way,Con-Way
+XPO Logistics,XPO Logistics
 Cape Cod Express,Cape Cod Express
 Central Transport,Central Transport
 Cal State Express,Cal State Express
@@ -74,6 +74,7 @@ Nebraska Transport,Nebraska Transport
 New England Motor Freight,New England Motor Freight
 North Park Transportation Co,North Park Transportation Co
 New Penn Motor Express,New Penn Motor Express
+N&M Transfer Co, Inc.,N&M Transfer Co, Inc.
 Oak Harbor Freight Lines,Oak Harbor Freight Lines
 Old Dominion,Old Dominion
 "Pitt Ohio Express, LLC","Pitt Ohio Express, LLC"
@@ -90,7 +91,7 @@ Shift Freight,Shift Freight
 Southwestern Motor Transport,Southwestern Motor Transport
 Standard Forwarding Company Inc,Standard Forwarding Company Inc
 SuperVan Service Co. Inc,SuperVan Service Co. Inc
-UPS Freight,UPS Freight
+TForce Freight,TForce Freight
 USF Reddaway,USF Reddaway
 Ward Trucking,Ward Trucking
 West Bend Transit,West Bend Transit

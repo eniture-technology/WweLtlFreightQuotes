@@ -37,8 +37,6 @@ class WweLTLCarriers
 
                 ['value' => 'CLNI',  'label'  => __('Clear Lane Freight Systems')],
 
-                ['value' => 'CNWY',  'label'  => __('Con-Way')],
-
                 ['value' => 'CPCD',  'label'  => __('Cape Cod Express')],
 
                 ['value' => 'CTII',  'label'  => __('Central Transport')],
@@ -46,6 +44,8 @@ class WweLTLCarriers
                 ['value' => 'CXRE',  'label'  => __('Cal State Express')],
 
                 ['value' => 'CGOJ',  'label'  => __('Cargomatic')],
+
+                ['value' => 'CTBV',  'label'  => __('Custom Companies')],
 
                 ['value' => 'DAFG',  'label'  => __('Dayton Freight')],
 
@@ -81,6 +81,8 @@ class WweLTLCarriers
 
                 ['value' => 'MIDW',  'label'  => __('Midwest Motor Express')],
 
+                ['value' => 'MTJG',  'label'  => __('Moran Transportation')],
+
                 ['value' => 'NEBT',  'label'  => __('Nebraska Transport')],
 
                 ['value' => 'NEMF',  'label'  => __('New England Motor Freight')],
@@ -88,6 +90,8 @@ class WweLTLCarriers
                 ['value' => 'NOPK',  'label'  => __('North Park Transportation Co')],
 
                 ['value' => 'NPME',  'label'  => __('New Penn Motor Express')],
+
+                ['value' => 'NMTF',  'label'  => __('N&M Transfer Co, Inc.')],
 
                 ['value' => 'OAKH',  'label'  => __('Oak Harbor Freight Lines')],
 
@@ -121,7 +125,7 @@ class WweLTLCarriers
 
                 ['value' => 'SVSE',  'label'  => __('SuperVan Service Co. Inc')],
 
-                ['value' => 'UPGF',  'label'  => __('UPS Freight')],
+                ['value' => 'UPGF',  'label'  => __('TForce Freight')],
 
                 ['value' => 'RETL',  'label'  => __('USF Reddaway')],
 
@@ -131,11 +135,9 @@ class WweLTLCarriers
 
                 ['value' => 'WTVA',  'label'  => __('Wilson Trucking Corporation')],
 
-                ['value' => 'RDWY',  'label'  => __('YRC')],
+                ['value' => 'CNWY',  'label'  => __('XPO Logistics')],
 
-                ['value' => 'CTBV',  'label'  => __('Custom Companies')],
-
-                ['value' => 'MTJG',  'label'  => __('Moran Transportation')]
+                ['value' => 'RDWY',  'label'  => __('YRC')]
 
         ];
     }

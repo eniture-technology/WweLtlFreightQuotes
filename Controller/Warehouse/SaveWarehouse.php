@@ -27,8 +27,7 @@ class SaveWarehouse extends Action
         Context $context,
         Data $dataHelper,
         WarehouseFactory $warehouseFactory
-    )
-    {
+    ) {
         $this->dataHelper = $dataHelper;
         $this->warehouseFactory = $warehouseFactory->create();
         parent::__construct($context);
@@ -39,7 +38,7 @@ class SaveWarehouse extends Action
      */
     public function execute()
     {
-        $insertQry = 0;
+        $insertQry = ['insertId' => 0, 'lastId' => 0];
         $updateQry = 0;
         $msg = 'Warehouse already exists.';
         $updateInSpLd = 'no';

@@ -38,8 +38,7 @@ class OrderDetailWidget extends Template implements TabInterface
         Context $context,
         Registry $registry,
         $data = []
-    )
-    {
+    ) {
         $this->coreRegistry = $registry;
         parent::__construct($context, $data);
     }

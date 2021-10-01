@@ -20,8 +20,7 @@ class EditDropship extends Action
     public function __construct(
         Context $context,
         Data $dataHelper
-    )
-    {
+    ) {
         $this->dataHelper = $dataHelper;
         parent::__construct($context);
     }

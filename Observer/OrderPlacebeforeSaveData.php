@@ -29,8 +29,7 @@ class OrderPlacebeforeSaveData implements ObserverInterface
     public function __construct(
         SessionManagerInterface $coreSession,
         ScopeConfigInterface $scopeConfig
-    )
-    {
+    ) {
         $this->coreSession = $coreSession;
         $this->offerLiftgateAsAnOption = $scopeConfig->getValue("WweLtQuoteSetting/third/OfferLiftgateAsAnOption", ScopeInterface::SCOPE_STORE);
     }
@@ -95,11 +94,19 @@ class OrderPlacebeforeSaveData implements ObserverInterface
         }
         foreach ($orderDetailData['shipmentData'] as $key => $value) {
             if ($multiShip) {
-                $quotes = reset($value['quotes']);
-                if ($liftGate) {
-                    $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['liftgate'];
+                if ($shippingMethod[1] == 'ownArrangement') {
+                    $orderDetailData['shipmentData'][$key]['quotes'] = [
+                        'code' => $shippingMethod[1],
+                        'title' => str_replace("WWE LTL Freight Quotes - ", "", $order->getShippingDescription()),
+                        'rate' => number_format((float)$order->getShippingAmount(), 2, '.', '')
+                    ];
                 } else {
-                    $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['simple'];
+                    $quotes = reset($value['quotes']);
+                    if ($liftGate) {
+                        $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['liftgate'];
+                    } else {
+                        $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['simple'];
+                    }
                 }
             } else {
                 $orderDetailData['shipmentData'][$key]['quotes'] = [

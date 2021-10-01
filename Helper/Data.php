@@ -122,8 +122,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         SessionManagerInterface $coreSession,
         Manager $cacheManager,
         ObjectManagerInterface $objectmanager
-    )
-    {
+    ) {
         $this->moduleManager = $context->getModuleManager();
         $this->connection = $resource->getConnection(ResourceConnection::DEFAULT_CONNECTION);
         $this->WHTableName = $resource->getTableName('warehouse');
@@ -319,8 +318,7 @@ class Data extends AbstractHelper implements DataHelperInterface
              *  not match then the Quotes Array should be returned as it is.
              * */
             if (isset($warehouseData['suppress_other']) && $warehouseData['suppress_other']) {
-                if (
-                    (isset($inStoreLd->inStorePickup->status) && $inStoreLd->inStorePickup->status == 1) ||
+                if ((isset($inStoreLd->inStorePickup->status) && $inStoreLd->inStorePickup->status == 1) ||
                     (isset($inStoreLd->localDelivery->status) && $inStoreLd->localDelivery->status == 1)
                 ) {
                     $quotesArray = [];
@@ -662,9 +660,10 @@ class Data extends AbstractHelper implements DataHelperInterface
                     }
                 }
             }
+
             //Todo: function naming according to the functionality
             $compiledQuotes = $this->getCompiledQuotes($originQuotes, $arraySorting, $lgQuotes);
-            if ($compiledQuotes !== null) {
+            if (!empty($compiledQuotes)) {
                 if (count($compiledQuotes) > 1) {
                     foreach ($compiledQuotes as $k => $service) {
                         $allQuotes['simple'][] = $service['simple'];
@@ -682,11 +681,12 @@ class Data extends AbstractHelper implements DataHelperInterface
             $count++;
         }
         $this->setOrderDetailWidgetData($odwArr, $hazShipmentArr);
-        $allQuotes = $this->getFinalQuotesArray($allQuotes);
+        if (!empty($allQuotes)) {
+            $allQuotes = $this->getFinalQuotesArray($allQuotes);
+        }
         if (!$this->isMultiShipment && isset($inStoreLdData) && !empty($inStoreLdData)) {
             $allQuotes = $this->inStoreLocalDeliveryQuotes($allQuotes, $inStoreLdData);
         }
-
         return $this->arrangeOwnFreight($allQuotes);
     }
 
@@ -767,7 +767,7 @@ class Data extends AbstractHelper implements DataHelperInterface
                 $quotesArr[] = [
                     'code' => $code,
                     'rate' => $rate,
-                    'title' => $this->getTitle('Freight', $isLiftGate, true)
+                    'title' => $this->getTitle('FRT', $isLiftGate, true)
                 ];
             } else {
                 $quotesArr[] = reset($value);
@@ -1260,9 +1260,8 @@ class Data extends AbstractHelper implements DataHelperInterface
     {
         $sliced = array_slice($ratesArray['simple'], 0, $options, true);
         $simplePrice = $this->getAveragePrice($sliced, $options);
-        $serviceName = $this->customLabel('Freight');
         $averageRateService[0]['simple'] = [
-            'title' => $serviceName,
+            'title' => $this->getTitle('Freight', false, true),
             'code' => 'AVG' . $this->getAccessorialCode(),
             'rate' => $simplePrice,
         ];
@@ -1271,7 +1270,7 @@ class Data extends AbstractHelper implements DataHelperInterface
             $sliced = array_slice($ratesArray['liftgate'], 0, $options, true);
             $lfgPrice = $this->getAveragePrice($sliced, $options);
             $averageRateService[0]['liftgate'] = [
-                'title' => $this->getTitle($serviceName, $lgQuotes),
+                'title' => $this->getTitle('Freight', $lgQuotes, true),
                 'code' => 'AVG' . $this->getAccessorialCode($lgQuotes),
                 'rate' => $lfgPrice,
             ];
@@ -1288,7 +1287,11 @@ class Data extends AbstractHelper implements DataHelperInterface
 
     public function customLabel($serviceName)
     {
-        return (($this->configSettings['ratingMethod'] == 1 || $this->configSettings['ratingMethod'] == 3) && $this->configSettings['labelAs'] != null) ? $this->configSettings['labelAs'] : $serviceName;
+        if($serviceName == 'FRT'){
+            return 'Freight';
+        }else{
+            return (($this->configSettings['ratingMethod'] == 1 || $this->configSettings['ratingMethod'] == 3) && $this->configSettings['labelAs'] != null) ? $this->configSettings['labelAs'] : $serviceName;
+        }
     }
 
     /**
@@ -1297,7 +1300,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      */
     public function arrangeOwnFreight($finalQuotes)
     {
-        if ($this->ownArangement == 0 || $this->ratingMethod == 3) {
+        if ($this->ownArangement == 0) {
             return $finalQuotes;
         }
         $ownArrangement = [];

@@ -43,8 +43,7 @@ class WweLTLShipmentPackage
         $dataHelper,
         $productLoader,
         $httpRequest
-    )
-    {
+    ) {
         $this->scopeConfig = $scopeConfig;
         $this->dataHelper = $dataHelper;
         $this->productLoader = $productLoader;
@@ -62,8 +61,7 @@ class WweLTLShipmentPackage
         $request,
         $_product,
         $receiverZipCode
-    )
-    {
+    ) {
         //Todo: need to check which warehouse is selected and method params conflict also must be fixed. fetchWarehouseSecData()
         $this->request = $request;
         $whQuery = $this->dataHelper->fetchWarehouseSecData('warehouse');

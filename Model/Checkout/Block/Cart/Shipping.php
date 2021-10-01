@@ -35,8 +35,7 @@ class Shipping extends LayoutProcessor
         AttributeMerger $merger,
         Collection $countryCollection,
         \Magento\Directory\Model\ResourceModel\Region\Collection $regionCollection
-    )
-    {
+    ) {
         $this->scopeConfig = $scopeConfig;
         parent::__construct($merger, $countryCollection, $regionCollection);
     }

@@ -15,7 +15,7 @@ require([
             modalClass: 'WweLt-add-ds-modal',
             responsive: true,
             innerScroll: true,
-            title: 'Drop Ship',
+            title: 'Drop ship',
             closeText: 'Close',
             focus: WweLtDsFormId + ' #WweLt-ds-nickname',
             buttons: [{

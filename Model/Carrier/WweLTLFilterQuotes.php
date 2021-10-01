@@ -69,7 +69,7 @@ class WweLTLFilterQuotes
      */
     public function randString()
     {
-        return md5(uniqid(mt_rand(), true));
+        return rand(10, 100);
     }
 
     /**

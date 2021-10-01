@@ -23,11 +23,11 @@ use Magento\Store\Model\ScopeInterface;
 use Psr\Log\LoggerInterface;
 
 /**
- * @category   Shipping
- * @package    Eniture_WweLtlFreightQuotes
- * @author     john@eniture-dev.com
- * @website    http://ess.eniture.com
- * @license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ * category   Shipping
+ * package    Eniture_WweLtlFreightQuotes
+ * author     Eniture Technologies
+ * website    https://eniture.com
+ * license    http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 class WweLTLShipping extends AbstractCarrier implements
     CarrierInterface
@@ -142,8 +142,7 @@ class WweLTLShipping extends AbstractCarrier implements
         WweLTLSetCarriersGlobally $setGlobalCarrier,
         RequestInterface $httpRequest,
         array $data = []
-    )
-    {
+    ) {
         $this->rateResultFactory = $rateResultFactory;
         $this->rateMethodFactory = $rateMethodFactory;
         $this->scopeConfig = $scopeConfig;
@@ -205,7 +204,7 @@ class WweLTLShipping extends AbstractCarrier implements
         $package = $this->getShipmentPackageRequest($ItemsList, $receiverZipCode, $request, $planInfo);
         $wweLtlArr = $this->generateReqData->generateEnitureArray();
 
-        if ($planInfo['planNumber'] >= 2 && $this->isHazmat == 'Y'){
+        if ($planInfo['planNumber'] >= 2 && $this->isHazmat == 'Y') {
             $wweLtlArr['api']['lineItemHazmatInfo'] = [
                 [
                     'isHazmatLineItem' => 'Y',
@@ -218,7 +217,7 @@ class WweLTLShipping extends AbstractCarrier implements
             ];
         }
 
-        if($planInfo['planNumber'] >= 2 && $this->isInsure){
+        if ($planInfo['planNumber'] >= 2 && $this->isInsure) {
             $wweLtlArr['api']['insureShipment'] = '1';
             $wweLtlArr['api']['insuranceCategory'] = $this->generateReqData->getInsuranceCategory();
         }
@@ -235,18 +234,6 @@ class WweLTLShipping extends AbstractCarrier implements
         }
         $url = EnConstants::QUOTES_URL;
         $quotes = $this->dataHelper->sendCurlRequest($url, $requestArr);
-        // Debug point will print data if en_print_query=1
-        if ($this->printQuery()) {
-            $printData = [
-                'url' => $url,
-                'buildQuery' => http_build_query($requestArr),
-                'request' => $requestArr,
-                'quotes' => $quotes];
-            echo '<pre>';
-            print_r($printData);
-            echo '</pre>';
-            exit();
-        }
 
         $quotesResult = $this->manageAllQuotes->getQuotesResultArr($quotes);
         $this->session->setEnShippingQuotes($quotesResult);
@@ -408,7 +395,7 @@ class WweLTLShipping extends AbstractCarrier implements
     private function getDims($_product, $dimOf)
     {
         $dimValue = $_product->getData('ts_dimensions_'.$dimOf);
-        if($dimValue != null){
+        if ($dimValue != null) {
             return $dimValue;
         }
 
@@ -421,23 +408,23 @@ class WweLTLShipping extends AbstractCarrier implements
      */
     private function setHzAndIns($_product, $planInfo)
     {
-        if ($planInfo['planNumber'] >= 2 && $_product->getData('en_hazmat')){
+        if ($planInfo['planNumber'] >= 2 && $_product->getData('en_hazmat')) {
             $hazmat = 'Y';
-        }else{
+        } else {
             $hazmat = 'N';
         }
 
-        if ($planInfo['planNumber'] >= 2 && $_product->getData('en_insurance')){
+        if ($planInfo['planNumber'] >= 2 && $_product->getData('en_insurance')) {
             $insurance = true;
-        }else{
+        } else {
             $insurance = false;
         }
 
-        if($hazmat == 'Y' && $this->isHazmat != 'Y'){
+        if ($hazmat == 'Y' && $this->isHazmat != 'Y') {
             $this->isHazmat = 'Y';
         }
 
-        if($insurance && !$this->isInsure){
+        if ($insurance && !$this->isInsure) {
             $this->isInsure = true;
         }
 
@@ -489,16 +476,5 @@ class WweLTLShipping extends AbstractCarrier implements
             }
             return $result;
         }
-    }
-
-    public function printQuery()
-    {
-        $printQuery = 0;
-        parse_str(parse_url($this->request->getServer('HTTP_REFERER'), PHP_URL_QUERY), $query);
-
-        if (!empty($query)) {
-            $printQuery = ($query['en_print_query']) ?? 0;
-        }
-        return $printQuery;
     }
 }

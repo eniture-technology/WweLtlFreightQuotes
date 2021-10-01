@@ -46,8 +46,7 @@ class WweLTLGenerateRequestData
         $moduleManager,
         $request,
         $dataHelper
-    )
-    {
+    ) {
         $this->registry = $registry;
         $this->scopeConfig = $scopeConfig;
         $this->moduleManager = $moduleManager;
@@ -68,7 +67,7 @@ class WweLTLGenerateRequestData
             'carrierMode' => 'pro', //$this->getConfigData('WweltlAccessLevel')
             'quotestType' => 'ltl', // ltl / small
             'version' => '2.0.8',
-            'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 10 : 0,
+            'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 1 : 0,
             'liftGateAsAnOption' => $this->getConfigData('OfferLiftgateAsAnOption'),
             'api' => $this->getApiInfoArr(),
             'getDistance' => $getDistance,
@@ -76,7 +75,6 @@ class WweLTLGenerateRequestData
     }
 
     /**
-     * Azeem
      * this function sets carriers array globally
      * @param $postData
      * @return array
@@ -337,7 +335,7 @@ class WweLTLGenerateRequestData
         // Register origin for Addon
         if ($this->registry->registry('pickupDeliveryLocation') === null) {
             $this->registry->register('pickupDeliveryLocation', $idMatchArr);
-            $_SESSION['pickupDeliveryLocation'] = $idMatchArr;
+//            $_SESSION['pickupDeliveryLocation'] = $idMatchArr;
         }
 
         $locationId = $idMatchArr['locationId'];
@@ -407,14 +405,15 @@ class WweLTLGenerateRequestData
         return $savedBins;
     }
 
-    public function getInsuranceCategory(){
+    public function getInsuranceCategory()
+    {
         $insureCat = $this->getConfigData('insuranceCategory');
-        if(empty($insureCat)){
+        if (empty($insureCat)) {
             $insuranceCatArr = [
                 'code' => '84',
                 'value' => 'General Merchandise'
             ];
-        }else{
+        } else {
             $insuranceCatArr = [
                 'code' => $insureCat,
                 'value' => $insureCat

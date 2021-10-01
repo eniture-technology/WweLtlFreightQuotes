@@ -35,8 +35,7 @@ class WweLTLOriginAddress extends Action
         Context $context,
         Data $dataHelper,
         ScopeConfigInterface $scopeConfig
-    )
-    {
+    ) {
         $this->dataHelper = $dataHelper;
         $this->scopeConfig = $scopeConfig;
         $this->request = $context->getRequest();

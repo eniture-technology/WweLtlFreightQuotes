@@ -50,8 +50,7 @@ class RADforLiftgate extends Field
         ScopeConfigInterface $scopeConfig,
         Manager $moduleManager,
         $data = []
-    )
-    {
+    ) {
         $this->scopeConfig = $context->getScopeConfig();
         $this->moduleManager = $moduleManager;
         $this->checkRADModule();

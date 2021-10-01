@@ -271,7 +271,7 @@ class WweLTLManageAllQuotes
 
         foreach ($this->ltlPackagesQuotes as $mainKey => $mainValue) {
             foreach ($mainValue as $key => $value) {
-                if(!in_array($key, $ltlOriginArr)){
+                if (!in_array($key, $ltlOriginArr)) {
                     array_push($ltlOriginArr, $key);
                 }
             }
@@ -279,7 +279,7 @@ class WweLTLManageAllQuotes
 
         foreach ($this->smallPackagesQuotes as $mainKey => $mainValue) {
             foreach ($mainValue as $key => $value) {
-                if(!in_array($key, $smallOriginArr)) {
+                if (!in_array($key, $smallOriginArr)) {
                     array_push($smallOriginArr, $key);
                 }
             }

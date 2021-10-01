@@ -9,5 +9,4 @@ class EnConstants
     const GOOGLE_URL    = 'https://ws011.eniture.com/addon/google-location.php';
     const APP_CODE      = 'ENWweLTL';
     const EN_URL        = 'https://eniture.com/magento2-worldwide-express-ltl-freight/';
-
 }

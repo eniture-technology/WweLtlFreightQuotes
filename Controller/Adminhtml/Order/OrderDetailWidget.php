@@ -59,8 +59,7 @@ class OrderDetailWidget extends Order
         OrderRepositoryInterface $orderRepository,
         LoggerInterface $logger,
         LayoutFactory $layoutFactory
-    )
-    {
+    ) {
         $this->layoutFactory = $layoutFactory;
         parent::__construct(
             $context,

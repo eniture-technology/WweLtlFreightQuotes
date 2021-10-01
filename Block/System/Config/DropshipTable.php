@@ -22,8 +22,7 @@ class DropshipTable extends Field
         Context $context,
         Data $dataHelper,
         $data = []
-    )
-    {
+    ) {
         $this->dataHelper = $dataHelper;
         parent::__construct($context, $data);
     }

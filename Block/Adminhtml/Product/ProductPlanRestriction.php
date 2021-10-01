@@ -27,8 +27,7 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
         Config $shipconfig,
         Data $dataHelper,
         array $data = []
-    )
-    {
+    ) {
         $this->context = $context;
         $this->shipconfig = $shipconfig;
         $this->dataHelper = $dataHelper;
@@ -75,10 +74,10 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
                     'label' => $carrierLabel,
                     'plan' => $carrierPlan
                 ];
-                if (strpos($carrierCode, 'LTL')) {
+                if (strpos($carrierCode, 'LTL') !== false) {
                     $numLTL++;
                 }
-                if (strpos($carrierCode, 'Smpkg')) {
+                if (strpos($carrierCode, 'Smpkg') !== false) {
                     $numSmPkg++;
                 }
                 if ($carrierPlan > 1) {
@@ -90,9 +89,9 @@ class ProductPlanRestriction extends \Magento\Config\Block\System\Config\Form\Fi
                 }
                 //elseif ($numSmPkg) old condition
 //                if ($numSmPkg) {
-                    if ($carrierPlan > 1) {
-                        $insEn++;
-                    }
+                if ($carrierPlan > 1) {
+                    $insEn++;
+                }
                     $restriction['data'][$carrierCode]['hazmat'] = $hazmat;
                     $restriction['data'][$carrierCode]['insurance'] = $insurance;
 //                }

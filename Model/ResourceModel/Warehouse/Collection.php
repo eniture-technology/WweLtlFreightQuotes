@@ -17,5 +17,4 @@ class Collection extends AbstractCollection
         $this->_init('Eniture\WweLtlFreightQuotes\Model\Warehouse', 'Eniture\WweLtlFreightQuotes\Model\ResourceModel\Warehouse');
         $this->_map['fields']['page_id'] = 'main_table.page_id';
     }
-
 }

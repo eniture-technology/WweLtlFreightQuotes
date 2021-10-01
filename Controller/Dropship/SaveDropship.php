@@ -27,8 +27,7 @@ class SaveDropship extends Action
         Context $context,
         Data $dataHelper,
         WarehouseFactory $warehouseFactory
-    )
-    {
+    ) {
         $this->dataHelper = $dataHelper;
         $this->warehouseFactory = $warehouseFactory->create();
         parent::__construct($context);
@@ -39,7 +38,7 @@ class SaveDropship extends Action
      */
     public function execute()
     {
-        $insertQry = 0;
+        $insertQry = ['insertId' => 0, 'lastId' => 0];
         $updateQry = 0;
         $updateInSpLd = 'no';
         $msg = 'Drop ship already exists.';
@@ -48,7 +47,6 @@ class SaveDropship extends Action
             $saveDsData[$key] = filter_var($post, FILTER_SANITIZE_STRING);
         }
         $inputDataArr = $this->dataHelper->originArray($saveDsData);
-
         $validateData = $this->dataHelper->validatedPostData($inputDataArr);
         $city = $validateData['city'];
         $state = $validateData['state'];

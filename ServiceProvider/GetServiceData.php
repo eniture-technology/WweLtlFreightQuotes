@@ -4,6 +4,7 @@
 namespace Eniture\WweLtlFreightQuotes\ServiceProvider;
 
 use Magento\Checkout\Model\Session;
+
 class GetServiceData
 {
     public $data;

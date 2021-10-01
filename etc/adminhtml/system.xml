@@ -186,7 +186,7 @@
                     <label>Allow For Own Arrangement</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>
-                        <![CDATA[Adds an option in the shipping cart for users to indicate that they will make and pay for their own LTL shipping arrangments.]]></comment>
+                        <![CDATA[Adds an option in the shipping cart for users to indicate that they will make and pay for their own LTL shipping arrangements.]]></comment>
                 </field>
                 <field id="ownArangementText" translate="label" type="text" sortOrder="25" showInDefault="1"
                        showInWebsite="1" showInStore="1">
@@ -200,7 +200,7 @@
                     <label>Return LTL quotes when an order's parcel shipment weight exceeds 150 lbs</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <comment>
-                        <![CDATA[When selected, the LTL Freight Quote plugin will return quotes when an order's total weight exceeds 150 lbs (the maximum permitted by FedEx and UPS), even if none of the products have settings to indicate that it will ship LTL. To increase the accuracy of the returned quote(s), all products should have accurate weights and dimensions.]]></comment>
+                        <![CDATA[When selected, the LTL Freight Quote module will return quotes when an order's total weight exceeds 150 lbs (the maximum permitted by FedEx and UPS), even if none of the products have settings to indicate that it will ship LTL. To increase the accuracy of the returned quote(s), all products should have accurate weights and dimensions.]]></comment>
                 </field>
             </group>
         </section>

@@ -5,4 +5,3 @@
     'Eniture_WweLtlFreightQuotes',
     __DIR__
 );
-

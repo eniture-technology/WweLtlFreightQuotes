@@ -173,6 +173,8 @@ function WweLtZipMilesValid() {
 }
 
 function WweLtWarehouseSaveResSettings(data) {
+
+    WweLtAddWarehouseRestriction(data.canAddWh);
     if (data.insert_qry == 1) {
         jQuery('#append-warehouse tr:last').after(
             '<tr id="row_' + data.id + '" data-id="' + data.id + '">' + WweLtGetRowData(data, 'wh') + '</tr>');
