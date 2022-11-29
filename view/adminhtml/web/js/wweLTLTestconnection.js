@@ -47,3 +47,24 @@ function WweLtConnectSuccessFunction(data) {
     let styleClass = data.error ? 'error': 'success';
     WweLtResponseMessage('WweLt-con-msg',styleClass, data.msg);
 }
+
+/**
+ * Test connection ajax call
+ * @param {object} $
+ * @param {string} ajaxURL
+ * @returns {function}
+ */
+ function wweLTLPlanRefresh(e){
+    let ajaxURL = e.getAttribute('planRefAjaxUrl');
+    let parameters = {};
+    WweLtAjaxRequest(parameters, ajaxURL, wweLtlPlanRefreshResponse);
+}
+
+/**
+ * Handle response
+ * @param {object} data
+ * @returns {void}
+ */
+function wweLtlPlanRefreshResponse(data){
+    document.location.reload(true);
+}

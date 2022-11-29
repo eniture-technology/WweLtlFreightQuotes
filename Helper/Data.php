@@ -353,8 +353,18 @@ class Data extends AbstractHelper implements DataHelperInterface
     {
         $return = [];
         $whCollection = $this->fetchWarehouseWithID($data['location'], $data['locationId']);
-        $inStore = json_decode($whCollection[0]['in_store'], true);
-        $locDel = json_decode($whCollection[0]['local_delivery'], true);
+
+        if(!empty($whCollection[0]['in_store']) && is_string($whCollection[0]['in_store'])){
+            $inStore = json_decode($whCollection[0]['in_store'], true);
+        }else{
+            $inStore = [];
+        }
+
+        if(!empty($whCollection[0]['local_delivery']) && is_string($whCollection[0]['local_delivery'])){
+            $locDel = json_decode($whCollection[0]['local_delivery'], true);
+        }else{
+            $locDel = [];
+        }
 
         if ($inStore) {
             $inStoreTitle = $inStore['checkout_desc_store_pickup'];
@@ -386,27 +396,35 @@ class Data extends AbstractHelper implements DataHelperInterface
     /**
      * @return string
      */
-    public function setPlanNotice()
+    public function setPlanNotice($planRefreshUrl = '')
     {
         $planPackage = $this->planInfo();
         if ($planPackage['storeType'] == '') {
             $planPackage = [];
         }
-        return $this->displayPlanMessages($planPackage);
+        return $this->displayPlanMessages($planPackage, $planRefreshUrl);
     }
 
     /**
      * @param $planPackage
      * @return string
      */
-    public function displayPlanMessages($planPackage)
+    public function displayPlanMessages($planPackage, $planRefreshUrl = '')
     {
-        $planMsg = __('Eniture - Worldwide Express LTL Freight Quotes plan subscription is inactive. Please activate plan subscription from <a target="_blank" href="https://eniture.com/magento2-worldwide-express-ltl-freight/">here</a>.');
+        $planRefreshLink = '';
+        if (!empty($planRefreshUrl)) {
+            $planRefreshLink = ', <a href="javascript:void(0)" id="wwe-ltl-plan-refresh-link" planRefAjaxUrl = '.$planRefreshUrl.' onclick="wweLTLPlanRefresh(this)" >click here</a> to update the license info. Afterward, sign out of Magento and then sign back in';
+            $planMsg = __('The subscription to the Worldwide Express LTL Freight Quotes module is inactive. If you believe the subscription should be active and you recently changed plans (e.g. upgraded your plan), your firewall may be blocking confirmation from our licensing system. To resolve the situation, <a href="javascript:void(0)" id="plan-refresh-link" planRefAjaxUrl = '.$planRefreshUrl.' onclick="wweLTLPlanRefresh(this)" >click this link</a> and then sign in again. If this does not resolve the issue, log in to eniture.com and verify the license status.');
+        }else{
+            $planMsg = __('The subscription to the Worldwide Express LTL Freight Quotes module is inactive. Please log into eniture.com and update your license.');
+        }
+
         if (isset($planPackage) && !empty($planPackage)) {
-            if ($planPackage['planNumber'] != null && $planPackage['planNumber'] != -1) {
-                $planMsg = __('Eniture - Worldwide Express LTL Freight Quotes is currently on the ' . $planPackage['planName'] . '. Your plan will expire within ' . $planPackage['expireDays'] . ' days and plan renews on ' . $planPackage['expiryDate'] . '.');
+            if (!empty($planPackage['planNumber']) && $planPackage['planNumber'] != '-1') {
+                $planMsg = __('The Worldwide Express LTL Freight Quotes from Eniture Technology is currently on the '.$planPackage['planName'].' and will renew on '.$planPackage['expiryDate'].'. If this does not reflect changes made to the subscription plan'.$planRefreshLink.'.');
             }
         }
+
         return $planMsg;
     }
 
@@ -555,7 +573,12 @@ class Data extends AbstractHelper implements DataHelperInterface
         try {
             $this->curl->post($url, $fieldString);
             $output = $this->curl->getBody();
-            $result = json_decode($output, $isAssocArray);
+            if(!empty($output) && is_string($output)){
+                $result = json_decode($output, $isAssocArray);
+            }else{
+                $result = ($isAssocArray) ? [] : '';
+            }
+
         } catch (\Throwable $e) {
             $result = [];
         }

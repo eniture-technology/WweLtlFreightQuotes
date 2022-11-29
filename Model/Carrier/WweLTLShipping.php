@@ -399,7 +399,8 @@ class WweLTLShipping extends AbstractCarrier implements
             return $dimValue;
         }
 
-        return $_product->getData('en_'.$dimOf);
+        $dimension = $_product->getData('en_'.$dimOf);
+        return !empty($dimension) ? $dimension : 0;
     }
 
     /**

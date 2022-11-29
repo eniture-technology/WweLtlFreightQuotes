@@ -31,10 +31,7 @@ class TestConnection extends Action
      */
     public function execute()
     {
-        $credentials = [];
-        foreach ($this->getRequest()->getParams() as $key => $data) {
-            $credentials[$key] = filter_var($data, FILTER_SANITIZE_STRING);
-        }
+        $credentials = $this->getRequest()->getParams();
         $postData = [
             'carrierName' => 'wweLTL',
             'carrier_mode' => 'test',

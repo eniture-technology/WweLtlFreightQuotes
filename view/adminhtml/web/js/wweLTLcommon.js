@@ -27,6 +27,10 @@ require([
             'validate-WweLt-decimal-limit-3', function (value) {
                 return !!(validateDecimal($, value, 3));
             }, $.mage.__('Maximum 3 digits allowed after decimal point.'));
+        $.validator.addMethod(
+            'validate-WweLt-positive-decimal-limit-2', function (value) {
+                return !!(validatePositiveDecimal($, value, 2));
+            }, 'Maximum 2 digits allowed after decimal point, and number should be positive.');
 
         $('#WweLtQuoteSetting_third_hndlngFee').attr('title', 'Handling Fee / Markup');
 
@@ -130,6 +134,24 @@ function validateDecimal($, value, limit) {
             break;
         default:
             pattern = /^[+-]?\d*(\.\d{0,2})?$/;
+            break;
+    }
+    let regex = new RegExp(pattern, 'g');
+    return regex.test(value);
+}
+
+
+function validatePositiveDecimal($, value, limit) {
+    let pattern;
+    switch (limit) {
+        case 4:
+            pattern = /^[+]?\d*(\.\d{0,4})?$/;
+            break;
+        case 3:
+            pattern = /^[+]?\d*(\.\d{0,3})?$/;
+            break;
+        default:
+            pattern = /^[+]?\d*(\.\d{0,2})?$/;
             break;
     }
     let regex = new RegExp(pattern, 'g');

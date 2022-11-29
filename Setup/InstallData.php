@@ -7,7 +7,6 @@
 namespace Eniture\WweLtlFreightQuotes\Setup;
 
 use Eniture\WweLtlFreightQuotes\App\State;
-use Eniture\WweLtlFreightQuotes\Cron\PlanUpgrade;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\ProductFactory;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
@@ -75,10 +74,6 @@ class InstallData implements InstallDataInterface
      */
     private $resourceConfig;
     /**
-     * @var PlanUpgrade
-     */
-    private $planUpgrade;
-    /**
      * @var Config
      */
     private $eavConfig;
@@ -96,7 +91,6 @@ class InstallData implements InstallDataInterface
      * @param ResourceConnection $resource
      * @param Curl $curl
      * @param ConfigInterface $resourceConfig
-     * @param PlanUpgrade $planUpgrade
      * @param Config $eavConfig
      */
     public function __construct(
@@ -107,7 +101,6 @@ class InstallData implements InstallDataInterface
         ResourceConnection $resource,
         Curl $curl,
         ConfigInterface $resourceConfig,
-        PlanUpgrade $planUpgrade,
         Config $eavConfig
     ) {
         $this->eavSetupFactory = $eavSetupFactory;
@@ -118,7 +111,6 @@ class InstallData implements InstallDataInterface
         $this->connection = $resource->getConnection(ResourceConnection::DEFAULT_CONNECTION);
         $this->curl = $curl;
         $this->resourceConfig = $resourceConfig;
-        $this->planUpgrade = $planUpgrade;
         $this->eavConfig = $eavConfig;
     }
 
@@ -132,8 +124,6 @@ class InstallData implements InstallDataInterface
         ModuleContextInterface $context
     ) {
         $this->state->validateAreaCode();
-        // Check plan info of current module
-        $this->planUpgrade->execute();
         $installer = $setup;
         $installer->startSetup();
         $eavSetup = $this->eavSetupFactory->create(['setup' => $setup]);

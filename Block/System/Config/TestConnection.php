@@ -77,6 +77,14 @@ class TestConnection extends Field
      */
     public function planNotice()
     {
-        return $this->dataHelper->setPlanNotice();
+        $planRefreshUrl = $this->getPlanRefreshUrl();
+        return $this->dataHelper->setPlanNotice($planRefreshUrl);
+    }
+    /**
+     * @return url
+     */
+    public function getPlanRefreshUrl()
+    {
+        return $this->getbaseUrl().'/wweltlfreightquotes/Test/PlanRefresh/';
     }
 }

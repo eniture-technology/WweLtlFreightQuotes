@@ -47,10 +47,8 @@ class WweLTLOriginAddress extends Action
      */
     public function execute()
     {
-        $data = [];
-        foreach ($this->getRequest()->getParams() as $key => $post) {
-            $data[$key] = filter_var($post, FILTER_SANITIZE_STRING);
-        }
+        $data = $this->getRequest()->getParams();
+        
         $originZip = isset($data['origin_zip']) ? $data['origin_zip'] : '';
 
         if ($originZip) {

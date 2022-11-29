@@ -31,6 +31,10 @@ class PlanUpgrade
      * @var ConfigInterface
      */
     private $resourceConfig;
+    /**
+     * @var ScopeConfigInterface
+     */
+    private $scopeConfig;
 
     /**
      * @param StoreManagerInterface $storeManager
@@ -42,11 +46,13 @@ class PlanUpgrade
         StoreManagerInterface $storeManager,
         Curl $curl,
         ConfigInterface $resourceConfig,
+        ScopeConfigInterface $scopeConfig,
         LoggerInterface $logger
     ) {
         $this->storeManager = $storeManager;
         $this->curl = $curl;
         $this->resourceConfig = $resourceConfig;
+        $this->scopeConfig      = $scopeConfig;
         $this->logger = $logger;
     }
 
@@ -55,18 +61,28 @@ class PlanUpgrade
      */
     public function execute()
     {
-        $domain = $this->storeManager->getStore()->getUrl();
+        $domain = $this->storeManager->getStore()->getBaseUrl(\Magento\Framework\UrlInterface::URL_TYPE_WEB);
+        $licenseKey = $this->scopeConfig->getValue(
+            'WweLtConnSettings/first/WweLtLicenseKey',
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
+
         $webhookUrl = $domain . 'wweltlfreightquotes';
         $postData = http_build_query([
             'platform' => 'magento2',
-//            'carrier' => '68',
             'carrier' => '11',
             'store_url' => $domain,
             'webhook_url' => $webhookUrl,
+            'license_key'   => ($licenseKey) ?? '',
         ]);
+        
         $this->curl->post($this->curlUrl, $postData);
         $output = $this->curl->getBody();
-        $result = json_decode($output, true);
+        if(!empty($output) && is_string($output)){
+            $result = json_decode($output, true);
+        }else{
+            $result = [];
+        }
 
         $plan = isset($result['pakg_group']) ? $result['pakg_group'] : '';
         $expireDay = isset($result['pakg_duration']) ? $result['pakg_duration'] : '';

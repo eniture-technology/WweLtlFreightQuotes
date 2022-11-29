@@ -30,10 +30,7 @@ class EditDropship extends Action
      */
     public function execute()
     {
-        $editDsData = [];
-        foreach ($this->getRequest()->getParams() as $key => $post) {
-            $editDsData[$key] = filter_var($post, FILTER_SANITIZE_STRING);
-        }
+        $editDsData = $this->getRequest()->getParams();
 
         $getDropShipId = $editDsData['edit_id'];
         $dropShipList = $this->dataHelper->fetchWarehouseWithID('dropship', $getDropShipId);

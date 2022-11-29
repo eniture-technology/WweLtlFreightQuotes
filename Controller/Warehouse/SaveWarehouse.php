@@ -42,10 +42,7 @@ class SaveWarehouse extends Action
         $updateQry = 0;
         $msg = 'Warehouse already exists.';
         $updateInSpLd = 'no';
-        $saveWhData = [];
-        foreach ($this->getRequest()->getParams() as $key => $post) {
-            $saveWhData[$key] = filter_var($post, FILTER_SANITIZE_STRING);
-        }
+        $saveWhData = $this->getRequest()->getParams();
         $inputDataArr = $this->dataHelper->originArray($saveWhData);
         $validateData = $this->dataHelper->validatedPostData($inputDataArr);
 

@@ -167,12 +167,14 @@ class ResidentialAddressDetection extends Field
      */
     public function planNotice()
     {
-        return $this->dataHelper->setPlanNotice();
+        $planRefreshUrl = $this->getPlanRefreshUrl();
+        return $this->dataHelper->setPlanNotice($planRefreshUrl);
     }
 
     public function ltlPlanNotice()
     {
-        return $this->dataHelper->setPlanNotice();
+        $planRefreshUrl = $this->getPlanRefreshUrl();
+        return $this->dataHelper->setPlanNotice($planRefreshUrl);
     }
 
     /**
@@ -181,5 +183,12 @@ class ResidentialAddressDetection extends Field
     public function planRestriction()
     {
         return json_encode($this->dataHelper->quoteSettingFieldsToRestrict());
+    }
+    /**
+     * @return url
+     */
+    public function getPlanRefreshUrl()
+    {
+        return $this->getbaseUrl().'/wweltlfreightquotes/Test/PlanRefresh/';
     }
 }

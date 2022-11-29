@@ -42,10 +42,7 @@ class SaveDropship extends Action
         $updateQry = 0;
         $updateInSpLd = 'no';
         $msg = 'Drop ship already exists.';
-        $saveDsData = [];
-        foreach ($this->getRequest()->getParams() as $key => $post) {
-            $saveDsData[$key] = filter_var($post, FILTER_SANITIZE_STRING);
-        }
+        $saveDsData = $this->getRequest()->getParams();
         $inputDataArr = $this->dataHelper->originArray($saveDsData);
         $validateData = $this->dataHelper->validatedPostData($inputDataArr);
         $city = $validateData['city'];

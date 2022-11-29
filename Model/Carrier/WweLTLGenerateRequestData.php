@@ -66,7 +66,7 @@ class WweLTLGenerateRequestData
             'serverName' => $this->request->getServer('SERVER_NAME'),
             'carrierMode' => 'pro', //$this->getConfigData('WweltlAccessLevel')
             'quotestType' => 'ltl', // ltl / small
-            'version' => '2.0.8',
+            'version' => '2.1.0',
             'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 1 : 0,
             'liftGateAsAnOption' => $this->getConfigData('OfferLiftgateAsAnOption'),
             'api' => $this->getApiInfoArr(),
@@ -134,7 +134,7 @@ class WweLTLGenerateRequestData
         $fedexOneRatePricing = $this->registry->registry('FedexOneRatePricing');
 
         $requestArr = [
-            'apiVersion' => '2.0',
+            'apiVersion' => '3.0',
             'platform' => 'magento2',
             'binPackagingMultiCarrier' => $this->binPackSuspend(),
             'autoResidentials' => $autoResidential,
