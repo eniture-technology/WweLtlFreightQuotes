@@ -66,7 +66,7 @@ class WweLTLGenerateRequestData
             'serverName' => $this->request->getServer('SERVER_NAME'),
             'carrierMode' => 'pro', //$this->getConfigData('WweltlAccessLevel')
             'quotestType' => 'ltl', // ltl / small
-            'version' => '2.1.0',
+            'version' => '3.0.0',
             'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 1 : 0,
             'liftGateAsAnOption' => $this->getConfigData('OfferLiftgateAsAnOption'),
             'api' => $this->getApiInfoArr(),
@@ -250,13 +250,22 @@ class WweLTLGenerateRequestData
         $shipperRelation = $this->getConfigData('shipperRelation');
 
         $apiArray = [
-            'speed_freight_username' => $this->getConfigData('WweLtUsername'),
-            'speed_freight_password' => $this->getConfigData('WweLtPassword'),
-            'speed_freight_authentication_key' => $this->getConfigData('WweLtAuthenticationKey'),
             'speed_freight_account_number' => $this->getConfigData('WweLtAccountNumber'),
             'speed_freight_residential_delivery' => $residential,
             'speed_freight_lift_gate_delivery' => $liftGate,
         ];
+
+        if($this->getConfigData('wweltlApiEndpoint') == 'new'){
+            $apiArray['ApiVersion'] = '2.0';
+            $apiArray['clientId'] = $this->getConfigData('wweltlClientId');
+            $apiArray['clientSecret'] = $this->getConfigData('wweltlClientSecret');
+            $apiArray['speed_freight_username'] = $this->getConfigData('wweLtUsernameNewAPI');
+            $apiArray['speed_freight_password'] = $this->getConfigData('wweLtPasswordNewAPI');
+        }else{
+            $apiArray['speed_freight_username'] = $this->getConfigData('WweLtUsername');
+            $apiArray['speed_freight_password'] = $this->getConfigData('WweLtPassword');
+            $apiArray['speed_freight_authentication_key'] = $this->getConfigData('WweLtAuthenticationKey');
+        }
 
         if ($shipperRelation == 'ThirdParty') {
             $apiArray['payerAddress'] = [

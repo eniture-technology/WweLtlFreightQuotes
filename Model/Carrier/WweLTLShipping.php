@@ -232,9 +232,10 @@ class WweLTLShipping extends AbstractCarrier implements
         if (empty($requestArr)) {
             return false;
         }
+        
         $url = EnConstants::QUOTES_URL;
         $quotes = $this->dataHelper->sendCurlRequest($url, $requestArr);
-
+        
         $quotesResult = $this->manageAllQuotes->getQuotesResultArr($quotes);
         $this->session->setEnShippingQuotes($quotesResult);
 

@@ -16,6 +16,7 @@ use Magento\Shipping\Model\Config;
 use Magento\Store\Model\ScopeInterface;
 use \Magento\Framework\ObjectManagerInterface;
 use Magento\Framework\App\Cache\Manager;
+use Magento\Framework\App\Config\Storage\WriterInterface;
 
 /**
  * Class Data
@@ -121,7 +122,8 @@ class Data extends AbstractHelper implements DataHelperInterface
         Registry $registry,
         SessionManagerInterface $coreSession,
         Manager $cacheManager,
-        ObjectManagerInterface $objectmanager
+        ObjectManagerInterface $objectmanager,
+        WriterInterface $configWriter
     ) {
         $this->moduleManager = $context->getModuleManager();
         $this->connection = $resource->getConnection(ResourceConnection::DEFAULT_CONNECTION);
@@ -135,6 +137,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $this->coreSession = $coreSession;
         $this->cacheManager = $cacheManager;
         $this->objectManager = $objectmanager;
+        $this->configWriter = $configWriter;
         parent::__construct($context);
     }
 
@@ -634,6 +637,10 @@ class Data extends AbstractHelper implements DataHelperInterface
         $this->configSettings = $this->getConfigData('WweLtQuoteSetting/third');
         $allConfigServices = $this->getAllConfigServicesArray($scopeConfig);
         $this->quoteSettingsData();
+
+        // Migration from Legacy to NEW API
+        $quotes = $this->migrateApiIfNeeded($quotes);
+
         if ($isMultiShipmentQuantity) {
             return $this->getOriginsMinimumQuotes($quotes, $allConfigServices);
         }
@@ -641,6 +648,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $count = 0;
         $lgQuotes = false;
         $this->isMultiShipment = (count($quotes) > 1) ? true : false;
+        
         foreach ($quotes as $origin => $quote) {
             if (isset($quote->severity)) {
                 return [];
@@ -1048,7 +1056,11 @@ class Data extends AbstractHelper implements DataHelperInterface
      */
     public function getAllConfigServicesArray($scopeConfig)
     {
-        return explode(',', $this->configSettings['carrierList']);
+        if(empty($this->configSettings['carrierList'])){
+            return [];
+        }else{
+            return explode(',', $this->configSettings['carrierList']);
+        }
     }
 
     /**
@@ -1353,7 +1365,7 @@ class Data extends AbstractHelper implements DataHelperInterface
 
             default:
                 $restriction = [
-//                    'advance' => $advance,
+                // 'advance' => $advance,
                     'standard' => $standard
                 ];
                 break;
@@ -1370,5 +1382,33 @@ class Data extends AbstractHelper implements DataHelperInterface
             $boxHelper =  $this->objectManager->get("Eniture\StandardBoxSizes\Helper\Data");
             return $boxHelper->getBoxFactory();
         }
+    }
+
+    /**
+     * Function to migrate API
+     */
+    protected function migrateApiIfNeeded($quotes)
+    {
+        foreach ($quotes as $key => $quote) {
+            if(isset($quote->newAPICredentials) && !empty($quote->newAPICredentials->client_id) && !empty($quote->newAPICredentials->client_secret)){
+                $this->configWriter->save('WweLtConnSettings/first/wweltlClientId', $quote->newAPICredentials->client_id);
+                $this->configWriter->save('WweLtConnSettings/first/wweltlClientSecret', $quote->newAPICredentials->client_secret);
+                $this->configWriter->save('WweLtConnSettings/first/wweltlApiEndpoint', 'new');
+                $username = $this->getConfigData('WweLtConnSettings/first/WweLtUsername');
+                $password = $this->getConfigData('WweLtConnSettings/first/WweLtPassword');
+                $this->configWriter->save('WweLtConnSettings/first/wweLtUsernameNewAPI', $username);
+                $this->configWriter->save('WweLtConnSettings/first/wweLtPasswordNewAPI', $password);
+                unset($quotes[$key]->newAPICredentials);
+                $this->clearCache();
+            }
+
+            if(isset($quote->oldAPICredentials)){
+                $this->configWriter->save('WweLtConnSettings/first/wweltlApiEndpoint', 'legacy');
+                unset($quotes[$key]->oldAPICredentials);
+                $this->clearCache();
+            }
+        }
+
+        return $quotes;
     }
 }
