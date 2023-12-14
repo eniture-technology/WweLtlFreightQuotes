@@ -66,7 +66,7 @@ class WweLTLGenerateRequestData
             'serverName' => $this->request->getServer('SERVER_NAME'),
             'carrierMode' => 'pro', //$this->getConfigData('WweltlAccessLevel')
             'quotestType' => 'ltl', // ltl / small
-            'version' => '3.0.0',
+            'version' => '3.1.0',
             'returnQuotesOnExceedWeight' => $this->getConfigData('weightExeeds') > 0 ? 1 : 0,
             'liftGateAsAnOption' => $this->getConfigData('OfferLiftgateAsAnOption'),
             'api' => $this->getApiInfoArr(),
@@ -321,48 +321,6 @@ class WweLTLGenerateRequestData
 
     /**
      *
-     * @param type $request
-     * @return int
-     */
-    public function checkEnablePickupDelivery($request)
-    {
-        $getDistance = 0;
-        $originArr = $this->registry->registry('shipmentOrigin');
-        $idMatchArr = [];
-
-        foreach ($originArr as $origin) {
-            if (count($idMatchArr) == 0) {
-                $idMatchArr = $origin;
-            } else {
-                $locationId = $origin['locationId'];
-                if ($locationId != $idMatchArr['locationId']) {
-                    return 0;
-                }
-            }
-        }
-
-        // Register origin for Addon
-        if ($this->registry->registry('pickupDeliveryLocation') === null) {
-            $this->registry->register('pickupDeliveryLocation', $idMatchArr);
-//            $_SESSION['pickupDeliveryLocation'] = $idMatchArr;
-        }
-
-        $locationId = $idMatchArr['locationId'];
-        $readresult = $this->_connection->query("SELECT enable_store_pickup, miles_store_pickup, match_postal_store_pickup, checkout_desc_store_pickup, enable_local_delivery, miles_local_delivery, match_postal_local_delivery, checkout_desc_local_delivery, fee_local_delivery, suppress_local_delivery FROM " . $this->whTableName . " WHERE warehouse_id IN ('" . $locationId . "')");
-        $pickupDlvryOptions = $readresult->fetch();
-
-        $instorePickup = $this->addInstorePickup($pickupDlvryOptions, $request);
-        $localDelivery = $this->addLocalDelivery($pickupDlvryOptions, $request);
-
-        if ($instorePickup == 'yes' || $localDelivery == 'yes') {
-            $getDistance = 1;
-        }
-
-        return $getDistance;
-    }
-
-    /**
-     *
      * @param $pickupDeliveryOptions
      * @param $request
      * @return string
@@ -375,7 +333,7 @@ class WweLTLGenerateRequestData
         $pickupEnable = $pickupDeliveryOptions['enable_store_pickup'];
         $inStoreZips = $pickupDeliveryOptions['match_postal_store_pickup'];
         if ($pickupEnable == 1) {
-            $matchPostals = explode(',', $inStoreZips);
+            $matchPostals = empty($inStoreZips) ? [] : explode(',', $inStoreZips);
             if (empty($inStoreZips) || !in_array($receiver['receiverZip'], $matchPostals)) {
                 $getMilesGoogleApi = 'yes';
             }
@@ -396,7 +354,7 @@ class WweLTLGenerateRequestData
         $pickupEnable = $pickupDeliveryOptions['enable_local_delivery'];
         $localDeliveryZips = $pickupDeliveryOptions['match_postal_local_delivery'];
         if ($pickupEnable == 1) {
-            $matchPostals = explode(',', $localDeliveryZips);
+            $matchPostals = empty($localDeliveryZips) ? [] : explode(',', $localDeliveryZips);
             if (empty($localDeliveryZips) || !in_array($receiver['receiverZip'], $matchPostals)) {
                 $getMilesGoogleApi = 'yes';
             }

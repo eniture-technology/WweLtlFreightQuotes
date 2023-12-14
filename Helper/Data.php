@@ -97,6 +97,21 @@ class Data extends AbstractHelper implements DataHelperInterface
     public $configSettings;
 
     public $objectManager;
+    public $wweLTLFilterQuotes;
+    public $configWriter;
+    public $residentialDlvry;
+    public $liftGate;
+    public $OfferLiftgateAsAnOption;
+    public $RADforLiftgate;
+    public $hndlngFee;
+    public $symbolicHndlngFee;
+    public $ratingMethod;
+    public $labelAs;
+    public $ownArangement;
+    public $ownArangementText;
+    public $options;
+    public $dlrvyEstimates;
+
 
     /**
      * @param Context $context
@@ -423,7 +438,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         }
 
         if (isset($planPackage) && !empty($planPackage)) {
-            if (!empty($planPackage['planNumber']) && $planPackage['planNumber'] != '-1') {
+            if (isset($planPackage['planNumber']) && $planPackage['planNumber'] != '' && $planPackage['planNumber'] != '-1') {
                 $planMsg = __('The Worldwide Express LTL Freight Quotes from Eniture Technology is currently on the '.$planPackage['planName'].' and will renew on '.$planPackage['expiryDate'].'. If this does not reflect changes made to the subscription plan'.$planRefreshLink.'.');
             }
         }
@@ -731,7 +746,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $handlingFeeMarkup = $this->hndlngFee;
         $symbolicHandlingFee = $this->symbolicHndlngFee;
 
-        if (strlen($handlingFeeMarkup) > 0) {
+        if (!empty($handlingFeeMarkup) > 0) {
             if ($symbolicHandlingFee == '%') {
                 $percentVal = $handlingFeeMarkup / 100 * $cost;
                 $grandTotal = $percentVal + $cost;
@@ -811,7 +826,7 @@ class Data extends AbstractHelper implements DataHelperInterface
     {
         $return = 'CFMS';
         $lg ? $return = $return . '+LG' : '';
-        $arr = (explode('+', $code));
+        $arr = empty($code) ? [] : (explode('+', $code));
         if (in_array('R', $arr)) {
             $return = $return . '+R';
         }
@@ -911,7 +926,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $handlingFeeMarkup = $this->hndlngFee;
         $symbolicHandlingFee = $this->symbolicHndlngFee;
 
-        if (strlen($handlingFeeMarkup) > 0) {
+        if (!empty($handlingFeeMarkup) > 0) {
             if ($symbolicHandlingFee == '%') {
                 $percentVal = $handlingFeeMarkup / 100 * $cost;
                 $grandTotal = $percentVal + $cost;
@@ -1059,7 +1074,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         if(empty($this->configSettings['carrierList'])){
             return [];
         }else{
-            return explode(',', $this->configSettings['carrierList']);
+            return empty($this->configSettings['carrierList']) ? [] : explode(',', $this->configSettings['carrierList']);
         }
     }
 
@@ -1125,25 +1140,6 @@ class Data extends AbstractHelper implements DataHelperInterface
         $groupId = 'first';
 
         return $this->scopeConfig->getValue("$sectionId/$groupId/$fieldId", ScopeInterface::SCOPE_STORE);
-    }
-
-    /**
-     * @param $cerriersRes
-     * @return array
-     */
-    public function carrierResult($cerriersRes)
-    {
-        $status = [];
-        if (isset($cerriersRes) && !empty($cerriersRes->carriers)) {
-            $date = $this->timezoneInterface->date()->format('m/d/y H:i:s');
-            $this->configWriter->save('cerasisLtlCarriers/second/requestTime', json_encode($date), $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeId = 0);
-            $this->configWriter->save('cerasisLtlCarriers/second/carriers', json_encode($cerriersRes), $scope = ScopeConfigInterface::SCOPE_TYPE_DEFAULT, $scopeId = 0);
-            $status['SUCCESS'] = true;
-        } else {
-            $status['ERROR'] = true;
-        }
-
-        return $status;
     }
 
     /**
@@ -1243,7 +1239,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      */
     public function generateResponse($msg = null, $type = true)
     {
-        $defaultError = 'Something went wrong. Please try again!';
+        $defaultError = 'Empty response from API.';
         return [
             'error' => ($type == true) ? 1 : 0,
             'msg' => ($msg != null) ? $msg : $defaultError

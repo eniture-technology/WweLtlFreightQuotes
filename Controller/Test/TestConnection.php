@@ -65,8 +65,7 @@ class TestConnection extends Action
     {
         $response = [];
         $successMsg = 'The test resulted in a successful connection.';
-        $errorMsg = 'The credentials entered did not result in a successful test. Confirm your credentials and try again.';
-        if (isset($data)) {
+        if (isset($data) && !empty($data)) {
             if(isset($data->severity)){
                 if($data->severity == 'SUCCESS'){
                     $response['msg'] = $successMsg;
@@ -82,6 +81,8 @@ class TestConnection extends Action
                 $response['msg'] = $successMsg;
             } elseif ($data->status == 'Error') {
                 $response = $this->dataHelper->generateResponse($data->error_desc, true);
+            }else{
+                $response = $this->dataHelper->generateResponse('An empty or unknown response format, therefore we are unable to determine whether it was successful or an error', true);
             }
         } else {
             $response = $this->dataHelper->generateResponse();
