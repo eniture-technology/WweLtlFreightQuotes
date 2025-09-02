@@ -99,7 +99,9 @@ class OrderPlacebeforeSaveData implements ObserverInterface
                     $orderDetailData['shipmentData'][$key]['quotes'] = [
                         'code' => $shippingMethod[1],
                         'title' => str_replace("WWE LTL Freight Quotes - ", "", $order->getShippingDescription()),
-                        'rate' => number_format((float)$order->getShippingAmount(), 2, '.', '')
+                        'rate' => number_format((float)$order->getShippingAmount(), 2, '.', ''),
+                        'carrierType' => 'LTL',
+                        'carrierName' => 'Worldwide Express LTL Freight Quotes'
                     ];
                 } else {
                     $quotes = reset($value['quotes']);
@@ -111,10 +113,11 @@ class OrderPlacebeforeSaveData implements ObserverInterface
                 }
             } else {
                 $orderDetailData['shipmentData'][$key]['quotes'] = [
-
                     'code' => $shippingMethod[1],
                     'title' => str_replace("WWE LTL Freight Quotes - ", "", $order->getShippingDescription()),
-                    'rate' => number_format((float)$order->getShippingAmount(), 2, '.', '')
+                    'rate' => number_format((float)$order->getShippingAmount(), 2, '.', ''),
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             }
         }

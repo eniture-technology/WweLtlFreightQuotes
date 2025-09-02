@@ -160,7 +160,9 @@ class WweLTLManageAllQuotes
                 $ltlQuotesFinalArr[$mainKey][] = [
                     'code' => $mainKey.'_Freight',
                     'title' => 'Freight ' . $this->resiLabel,
-                    'rate' => $ltlRate
+                    'rate' => $ltlRate,
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             }
         } else {
@@ -169,7 +171,9 @@ class WweLTLManageAllQuotes
                     $ltlQuotesFinalArr[$key][] = [
                         'code' => $key.'_Freight',
                         'title' => 'Freight ' . $this->resiLabel,
-                        'rate' => $minimumSmallRate
+                        'rate' => $minimumSmallRate,
+                        'carrierType' => 'LTL',
+                        'carrierName' => 'Worldwide Express LTL Freight Quotes'
                     ];
                 }
             }
@@ -354,7 +358,9 @@ class WweLTLManageAllQuotes
                 $updatedLtlQuotesArr[$moduleKey][] = [
                     'code' => $moduleKey . '_Freight',
                     'title' => 'Freight ' . $this->resiLabel,
-                    'rate' => $finalRate
+                    'rate' => $finalRate,
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             }
         } else {
@@ -362,7 +368,9 @@ class WweLTLManageAllQuotes
                 $updatedLtlQuotesArr[$key][] = [
                     'code' => $key.'_Freight',
                     'title' => 'Freight',
-                    'rate' => $minSmallRate
+                    'rate' => $minSmallRate,
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             }
         }

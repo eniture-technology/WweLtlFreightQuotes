@@ -348,6 +348,8 @@ class Data extends AbstractHelper implements DataHelperInterface
                     'rate' => 0,
                     'transitTime' => '',
                     'title' => $warehouseData['inStoreTitle'],
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             }
 
@@ -357,6 +359,8 @@ class Data extends AbstractHelper implements DataHelperInterface
                     'rate' => $warehouseData['fee_local_delivery'] ?? 0,
                     'transitTime' => '',
                     'title' => $warehouseData['locDelTitle'],
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             }
         }
@@ -694,6 +698,8 @@ class Data extends AbstractHelper implements DataHelperInterface
                         $originQuotes[$key]['simple']['code'] = $data->serviceType . $access;
                         $originQuotes[$key]['simple']['rate'] = $price;
                         $originQuotes[$key]['simple']['title'] = $title;
+                        $originQuotes[$key]['simple']['carrierType'] = 'LTL';
+                        $originQuotes[$key]['simple']['carrierName'] = 'Worldwide Express LTL Freight Quotes';
                         if ($lgQuotes) {
                             $lgAccess = $this->getAccessorialCode(true);
                             $lgPrice = $this->calculatePrice($data, true);
@@ -702,6 +708,8 @@ class Data extends AbstractHelper implements DataHelperInterface
                             $originQuotes[$key]['liftgate']['code'] = $data->serviceType . $lgAccess;
                             $originQuotes[$key]['liftgate']['rate'] = $lgPrice;
                             $originQuotes[$key]['liftgate']['title'] = $lgTitle;
+                            $originQuotes[$key]['liftgate']['carrierType'] = 'LTL';
+                            $originQuotes[$key]['liftgate']['carrierName'] = 'Worldwide Express LTL Freight Quotes';
                         }
                     }
                 }
@@ -813,7 +821,9 @@ class Data extends AbstractHelper implements DataHelperInterface
                 $quotesArr[] = [
                     'code' => $code,
                     'rate' => $rate,
-                    'title' => $this->getTitle('FRT', $isLiftGate, true)
+                    'title' => $this->getTitle('FRT', $isLiftGate, true),
+                    'carrierType' => 'LTL',
+                    'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
             } else {
                 $quotesArr[] = reset($value);
@@ -1021,7 +1031,9 @@ class Data extends AbstractHelper implements DataHelperInterface
                             'code'=> str_replace('_', '', $availSer->serviceType),
                             'rate' => $totalCost,
                             'title' => $this->labelAs . $autoResTitle,
-                            'resi' => $resiArr
+                            'resi' => $resiArr,
+                            'carrierType' => 'LTL',
+                            'carrierName' => 'Worldwide Express LTL Freight Quotes'
                         ];
                         if ($counter == 0) {
                             $minInQ = $currentArray;
@@ -1094,7 +1106,9 @@ class Data extends AbstractHelper implements DataHelperInterface
             $allowed = [
                 'code' => $code,// or carrier name
                 'title' => $title . $appendLabel,
-                'rate' => $grandTotal
+                'rate' => $grandTotal,
+                'carrierType' => 'LTL',
+                'carrierName' => 'Worldwide Express LTL Freight Quotes'
             ];
         }
 
@@ -1108,7 +1122,9 @@ class Data extends AbstractHelper implements DataHelperInterface
                 "I'll Arrange My Own Freight";
             $finalArr[] = ['code' => 'OWAR',// or carrier name
                 'title' => $title,
-                'rate' => 0
+                'rate' => 0,
+                'carrierType' => 'LTL',
+                'carrierName' => 'Worldwide Express LTL Freight Quotes'
             ];
         }
 
@@ -1295,6 +1311,8 @@ class Data extends AbstractHelper implements DataHelperInterface
             'title' => $this->getTitle('Freight', false, true),
             'code' => 'AVG' . $this->getAccessorialCode(),
             'rate' => $simplePrice,
+            'carrierType' => 'LTL',
+            'carrierName' => 'Worldwide Express LTL Freight Quotes'
         ];
         if ($lgQuotes) {
             asort($ratesArray['liftgate']);
@@ -1304,6 +1322,8 @@ class Data extends AbstractHelper implements DataHelperInterface
                 'title' => $this->getTitle('Freight', $lgQuotes, true),
                 'code' => 'AVG' . $this->getAccessorialCode($lgQuotes),
                 'rate' => $lfgPrice,
+                'carrierType' => 'LTL',
+                'carrierName' => 'Worldwide Express LTL Freight Quotes'
             ];
         }
         return $averageRateService;
@@ -1338,7 +1358,9 @@ class Data extends AbstractHelper implements DataHelperInterface
         $ownArrangement[] = [
             'code' => 'ownArrangement',
             'title' => (!empty($this->ownArangementText)) ? $this->ownArangementText : "I'll Arrange My Own Freight",
-            'rate' => 0
+            'rate' => 0,
+            'carrierType' => 'LTL',
+            'carrierName' => 'Worldwide Express LTL Freight Quotes'
         ];
         return array_merge($finalQuotes, $ownArrangement);
     }

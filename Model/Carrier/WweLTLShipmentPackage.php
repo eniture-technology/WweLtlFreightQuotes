@@ -94,7 +94,6 @@ class WweLTLShipmentPackage
     public function multiWarehouse($warehouseList, $receiverZipCode)
     {
         $planNumber = $this->dataHelper->planInfo()['planNumber'];
-
         if (!empty($warehouseList)) {
             if (count($warehouseList) == 1) {
                 $warehouseList = reset($warehouseList);
