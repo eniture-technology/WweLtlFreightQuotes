@@ -235,7 +235,7 @@ class WweLTLShipping extends AbstractCarrier implements
         
         $url = EnConstants::QUOTES_URL;
         $quotes = $this->dataHelper->sendCurlRequest($url, $requestArr);
-        
+
         $quotesResult = $this->manageAllQuotes->getQuotesResultArr($quotes);
         $this->session->setEnShippingQuotes($quotesResult);
 

@@ -1,23 +1,19 @@
-<script type="text/javascript">
-    let WweLtOriginAddressUrl = '<?=  $block->getOriginAddressUrl() ?>';
-</script>
-
-
 <?php
 if ($block->enable == 'yes') {
     $isChecked = $block->getIsChecked();
     $isSuspended = $block->isRadSuspended();
     $yes = $no = '';
     ($isChecked == '1') ? $yes = 'selected="selected"' : $no = 'selected="selected"'; ?>
-    <select id="WweLtQuoteSetting_third_RADforLiftgate"
-            name="groups[third][fields][RADforLiftgate][value]"
+    <select id="WweLtQuoteSetting_third_RADforLimitedAccess"
+            name="groups[third][fields][RADforLimitedAccess][value]"
             class=" select admin__control-select"
-            data-ui-id="select-groups-third-fields-radforLiftgate-value"
+            data-ui-id="select-groups-third-fields-radforlimitedaccess-value"
             data-rad-suspended="<?= $isSuspended ? '1' : '0' ?>">
         <option value="1" <?= $block->escapeHtml($yes); ?>>Yes</option>
         <option value="0" <?= $block->escapeHtml($no) ?>>No</option>
     </select>
     <p class="note rad-suspended-note" style="<?= $isSuspended ? '' : 'display:none' ?>"><span>This option is unavailable because the Residential Address Detection module is suspended.</span></p>
+    <p class="note"><span>When checked, if a residential delivery address is detected the limited access delivery fee will be included in the shipping rate estimate. In such cases, the option to Offer limited access delivery as an option will be suppressed, even if enabled. Enabling both the Offer limited access delivery as an option setting and the Include limited access delivery when residential delivery is detected setting allows commercial customers to choose whether or not limited access service is needed while always requiring it for residential customers.</span></p>
 
 <?php } else { ?>
     <div class="rad">

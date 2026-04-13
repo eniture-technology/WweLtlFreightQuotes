@@ -32,6 +32,23 @@ require([
                 return !!(validatePositiveDecimal($, value, 2));
             }, 'Maximum 2 digits allowed after decimal point, and number should be positive.');
 
+        $.validator.addMethod(
+            'validate-WweLt-limited-access-fee', function (value) {
+                var row = $('#row_WweLtQuoteSetting_third_limitedAccessFee');
+                if (row.is(':hidden')) {
+                    return true; // not required when field is hidden
+                }
+                if (value === '' || value === null) {
+                    return false;
+                }
+                var pattern = /^\d{1,5}(\.\d{1,2})?$/;
+                if (!pattern.test(value)) {
+                    return false;
+                }
+                var num = parseFloat(value);
+                return num > 0 && num <= 99999.99;
+            }, 'Please enter a valid fee greater than 0, up to 99999.99 with a maximum of 2 decimal places.');
+
         $('#WweLtQuoteSetting_third_hndlngFee').attr('title', 'Handling Fee / Markup');
 
         $('.hide-val').click(function () {
@@ -72,6 +89,44 @@ require([
             $("#wh-origin-city").val('');
             $("#wh-origin-state").val('');
             $("#wh-origin-country").val('');
+        });
+
+        // "Always quote" is exclusive with the other two; the other two can coexist
+        $('#WweLtQuoteSetting_third_limitedAccessDelivery').on('change', function () {
+            if (this.value == '1') {
+                $('#WweLtQuoteSetting_third_offerLimitedAccessAsOption').val('0');
+                $('#WweLtQuoteSetting_third_RADforLimitedAccess').val('0');
+            }
+            toggleLimitedAccessFee();
+        });
+
+        $('#WweLtQuoteSetting_third_offerLimitedAccessAsOption').on('change', function () {
+            if (this.value == '1') {
+                $('#WweLtQuoteSetting_third_limitedAccessDelivery').val('0');
+            }
+            toggleLimitedAccessFee();
+        });
+
+        $('#WweLtQuoteSetting_third_RADforLimitedAccess').on('change', function () {
+            if (this.value == '1') {
+                $('#WweLtQuoteSetting_third_limitedAccessDelivery').val('0');
+            }
+            toggleLimitedAccessFee();
+        });
+
+        // Initialize fee field visibility on page load
+        toggleLimitedAccessFee();
+
+        // Initialize RAD-suspended fields on page load
+        jQuery('select[data-rad-suspended]').each(function() {
+            var isSuspended = jQuery(this).attr('data-rad-suspended') === '1';
+            jQuery(this).prop('disabled', isSuspended);
+            var note = jQuery(this).siblings('p.rad-suspended-note');
+            if (isSuspended) {
+                note.show();
+            } else {
+                note.hide();
+            }
         });
 
         $('#WweLtQuoteSetting_third_liftGate').on('change', function () {
@@ -209,6 +264,25 @@ function WweLtNotesToggleHandling($, divAfter, className, carrierDiv) {
 function changeLiftgateOption(selectId, optionVal) {
     if (optionVal == 1) {
         jQuery(selectId).val(0);
+    }
+}
+
+function changeLimitedAccessOption(selectId, optionVal) {
+    if (optionVal == 1) {
+        jQuery(selectId).val(0);
+    }
+}
+
+function toggleLimitedAccessFee() {
+    var alwaysQuote = jQuery('#WweLtQuoteSetting_third_limitedAccessDelivery').val();
+    var offerAsOption = jQuery('#WweLtQuoteSetting_third_offerLimitedAccessAsOption').val();
+    var radForLimited = jQuery('#WweLtQuoteSetting_third_RADforLimitedAccess').val();
+    var showFee = (alwaysQuote == '1' || offerAsOption == '1' || radForLimited == '1');
+    var row = jQuery('#row_WweLtQuoteSetting_third_limitedAccessFee');
+    if (showFee) {
+        row.show();
+    } else {
+        row.hide();
     }
 }
 

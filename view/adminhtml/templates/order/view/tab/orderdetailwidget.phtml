@@ -9,7 +9,7 @@
         $shipmentNumber = 1;
         foreach ($orderDetailData['shipmentData'] as $key => $order) {
             if (isset($order) && !empty($order)) {
-                $residential = $liftGate = false;
+                $residential = $liftGate = $limitedAccess = false;
                 $resi = $order['quotes']['residentialDelivery'] ?? false;
                 $title = (isset($order['quotes']['title'])) ? $order['quotes']['title'] . ' :' : '';
                 $rate = (isset($order['quotes']['rate'])) ? number_format((float)$order['quotes']['rate'], 2, '.', '') : '0.00';
@@ -43,6 +43,7 @@
                             if ($liftGate) {
                                 $liftGate = $liftGate['always'] || $liftGate['asOption'] || $liftGate['residentialLiftgate'] == 'yes' ? 'Liftgate Delivery' : false;
                             }
+                            $limitedAccess = !empty($orderDetailData['limitedAccessDelivery']) ? 'Limited Access Delivery' : false;
                         }
                     }
 
@@ -53,7 +54,7 @@
                     $findInsuredItems = array_column($lineItems, 'product_insurance_active');
                     $insurance = (in_array("1", $findInsuredItems)) ? 'Insurance' : '';
 
-                    if ($residential || $hazardous || $liftGate || $insurance) { ?>
+                    if ($residential || $hazardous || $liftGate || $insurance || $limitedAccess) { ?>
                         <h4 class='order-detail-hdng'>Additional Information</h4>
                         <div class="order-additionalInfo-block">
                             <?php
@@ -84,6 +85,14 @@
                                 <span class="list-item">
                                     <?= /* @noEscape */
                                     __($liftGate) ?>
+                                    </span>
+
+                            <?php }
+
+                            if ($limitedAccess) { ?>
+                                <span class="list-item">
+                                    <?= /* @noEscape */
+                                    __($limitedAccess) ?>
                                     </span>
 
                             <?php } ?>

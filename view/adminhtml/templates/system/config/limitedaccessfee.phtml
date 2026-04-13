@@ -1,0 +1,10 @@
+<?php
+$feeValue = $block->getFeeValue();
+?>
+<input type="text"
+       id="WweLtQuoteSetting_third_limitedAccessFee"
+       name="groups[third][fields][limitedAccessFee][value]"
+       value="<?= $block->escapeHtmlAttr($feeValue) ?>"
+       class="input-text admin__control-text validate-WweLt-limited-access-fee"
+       data-ui-id="text-groups-third-fields-limitedaccessfee-value" />
+<p class="note"><span><?= $block->escapeHtml(__("The limited access delivery fee may differ depending on the type of facility. The app can't prompt for the type of facility. So, enter the amount you'd like to collect regardless of facility type.")) ?></span></p>

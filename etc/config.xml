@@ -9,6 +9,10 @@
         </WweLtConnSettings>
         <wweLtlQuoteSetting>
             <third>
+                <limitedAccessDelivery>0</limitedAccessDelivery>
+                <offerLimitedAccessAsOption>0</offerLimitedAccessAsOption>
+                <RADforLimitedAccess>0</RADforLimitedAccess>
+                <limitedAccessFee></limitedAccessFee>
                 <carrierList>
                     AACT,ABFS,AMAP,APXT,ATMR,AVRT,BCKT,BEAV,BTVP,CAZF,CENF,CLNI,CNWY,CPCD,CTII,CXRE,DAFG,DDPP,DHRN,DPHE,DTST,DUBL,DYLT,EXLA,FCSY,FLAN,FTSC,FWDN,GLDF,HMES,MTVL,LAXV,LKVL,MIDW,NEBT,NEMF,NOPK,NPME,NMTF,OAKH,ODFL,PITD,PMLI,PNII,PYLE,RDFS,RDWY,RETL,RJWI,RLCA,ROSI,RXIC,SAIA,SEFL,SHIF,SMTL,STDF,SVSE,UPGF,WARD,WEBE,WTVA,LFMS,CTBV,MTJG,CGOJ,BRTC
                 </carrierList>

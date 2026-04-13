@@ -10,19 +10,13 @@ use Magento\Framework\Module\Manager;
 use Magento\Store\Model\ScopeInterface;
 
 /**
- * Class RADforLiftgate
+ * Class RADforLimitedAccess
  * @package Eniture\WweLtlFreightQuotes\Block\System\Config
  */
-class RADforLiftgate extends Field
+class RADforLimitedAccess extends Field
 {
-    /**
-     * CONFIG_PATH
-     */
-    const CONFIG_PATH = 'WweLtQuoteSetting/third/RADforLiftgate';
-    /**
-     *
-     */
-    const RAD_TEMPLATE = 'system/config/radforliftgate.phtml';
+    const CONFIG_PATH = 'WweLtQuoteSetting/third/RADforLimitedAccess';
+    const RAD_TEMPLATE = 'system/config/radforlimitedaccess.phtml';
 
     /**
      * @var Manager
@@ -33,13 +27,14 @@ class RADforLiftgate extends Field
      * @var ScopeConfigInterface
      */
     public $scopeConfig;
+
     /**
      * @var string
      */
     public $enable = 'no';
 
     /**
-     * RADforLiftgate constructor.
+     * RADforLimitedAccess constructor.
      * @param Context $context
      * @param ScopeConfigInterface $scopeConfig
      * @param Manager $moduleManager

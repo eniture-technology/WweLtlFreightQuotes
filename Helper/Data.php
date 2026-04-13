@@ -103,6 +103,14 @@ class Data extends AbstractHelper implements DataHelperInterface
     public $liftGate;
     public $OfferLiftgateAsAnOption;
     public $RADforLiftgate;
+    public $limitedAccessDelivery;
+    public $offerLimitedAccessAsOption;
+    public $RADforLimitedAccess;
+    public $limitedAccessFee;
+    public $laLabel;
+    public $lgLaLabel;
+    public $resiLaLabel;
+    public $resiLgLaLabel;
     public $hndlngFee;
     public $symbolicHndlngFee;
     public $ratingMethod;
@@ -560,6 +568,10 @@ class Data extends AbstractHelper implements DataHelperInterface
             'liftGate' => 'liftGate',
             'OfferLiftgateAsAnOption' => 'OfferLiftgateAsAnOption',
             'RADforLiftgate' => 'RADforLiftgate',
+            'limitedAccessDelivery' => 'limitedAccessDelivery',
+            'offerLimitedAccessAsOption' => 'offerLimitedAccessAsOption',
+            'RADforLimitedAccess' => 'RADforLimitedAccess',
+            'limitedAccessFee' => 'limitedAccessFee',
             'hndlngFee' => 'hndlngFee',
             'symbolicHndlngFee' => 'symbolicHndlngFee',
         ];
@@ -568,7 +580,11 @@ class Data extends AbstractHelper implements DataHelperInterface
         }
         $this->resiLabel = ' with residential delivery';
         $this->lgLabel = ' with lift gate delivery';
-        $this->resiLgLabel = ' with residential delivery and lift gate delivery';
+        $this->resiLgLabel = ' with residential and lift gate delivery';
+        $this->laLabel = ' with limited access delivery';
+        $this->lgLaLabel = ' with lift gate and limited access delivery';
+        $this->resiLaLabel = ' with residential and limited access delivery';
+        $this->resiLgLaLabel = ' with residential, lift gate, and limited access delivery';
     }
 
     /**
@@ -678,7 +694,10 @@ class Data extends AbstractHelper implements DataHelperInterface
                 $this->getAutoResidentialTitle($isRad);
                 $inStoreLdData = $quote->InstorPickupLocalDelivery ?? false;
                 unset($quote->InstorPickupLocalDelivery);
-                $lgQuotes = ($this->liftGate || $this->OfferLiftgateAsAnOption || ($this->isResi && $this->RADforLiftgate)) ? true : false;
+                // "Always" modes bake the fee into the base price — no separate variant needed.
+                // Variants are only needed when offering as an option or when RAD forces it for residential.
+                $lgQuotes = ($this->OfferLiftgateAsAnOption || ($this->isResi && $this->RADforLiftgate && $this->liftGate != '1')) ? true : false;
+                $laQuotes = ($this->offerLimitedAccessAsOption || ($this->isResi && $this->RADforLimitedAccess && $this->limitedAccessDelivery != '1')) ? true : false;
             }
 
             $originQuotes = [];
@@ -700,6 +719,7 @@ class Data extends AbstractHelper implements DataHelperInterface
                         $originQuotes[$key]['simple']['title'] = $title;
                         $originQuotes[$key]['simple']['carrierType'] = 'LTL';
                         $originQuotes[$key]['simple']['carrierName'] = 'Worldwide Express LTL Freight Quotes';
+
                         if ($lgQuotes) {
                             $lgAccess = $this->getAccessorialCode(true);
                             $lgPrice = $this->calculatePrice($data, true);
@@ -711,22 +731,48 @@ class Data extends AbstractHelper implements DataHelperInterface
                             $originQuotes[$key]['liftgate']['carrierType'] = 'LTL';
                             $originQuotes[$key]['liftgate']['carrierName'] = 'Worldwide Express LTL Freight Quotes';
                         }
+
+                        if ($laQuotes) {
+                            $laAccess = $this->getAccessorialCode(false, true);
+                            $laPrice = $this->calculatePrice($data, false, false, true);
+                            $laTitle = $this->getTitle($data->serviceDesc, false, false, $data->transitTime, true);
+                            $arraySorting['limited'][$key] = $laPrice;
+                            $originQuotes[$key]['limited']['code'] = $data->serviceType . $laAccess;
+                            $originQuotes[$key]['limited']['rate'] = $laPrice;
+                            $originQuotes[$key]['limited']['title'] = $laTitle;
+                            $originQuotes[$key]['limited']['carrierType'] = 'LTL';
+                            $originQuotes[$key]['limited']['carrierName'] = 'Worldwide Express LTL Freight Quotes';
+                        }
+
+                        if ($lgQuotes && $laQuotes) {
+                            $lgLaAccess = $this->getAccessorialCode(true, true);
+                            $lgLaPrice = $this->calculatePrice($data, true, false, true);
+                            $lgLaTitle = $this->getTitle($data->serviceDesc, true, false, $data->transitTime, true);
+                            $arraySorting['liftgate_limited'][$key] = $lgLaPrice;
+                            $originQuotes[$key]['liftgate_limited']['code'] = $data->serviceType . $lgLaAccess;
+                            $originQuotes[$key]['liftgate_limited']['rate'] = $lgLaPrice;
+                            $originQuotes[$key]['liftgate_limited']['title'] = $lgLaTitle;
+                            $originQuotes[$key]['liftgate_limited']['carrierType'] = 'LTL';
+                            $originQuotes[$key]['liftgate_limited']['carrierName'] = 'Worldwide Express LTL Freight Quotes';
+                        }
                     }
                 }
             }
 
             //Todo: function naming according to the functionality
-            $compiledQuotes = $this->getCompiledQuotes($originQuotes, $arraySorting, $lgQuotes);
+            $compiledQuotes = $this->getCompiledQuotes($originQuotes, $arraySorting, $lgQuotes, $laQuotes);
             if (!empty($compiledQuotes)) {
-                if (count($compiledQuotes) > 1) {
-                    foreach ($compiledQuotes as $k => $service) {
-                        $allQuotes['simple'][] = $service['simple'];
-                        $lgQuotes ? $allQuotes['liftgate'][] = $service['liftgate'] : '';
-                    }
-                } else {
-                    $service = reset($compiledQuotes);
+                foreach (array_values($compiledQuotes) as $service) {
                     $allQuotes['simple'][] = $service['simple'];
-                    $lgQuotes ? $allQuotes['liftgate'][] = $service['liftgate'] : '';
+                    if ($lgQuotes) {
+                        $allQuotes['liftgate'][] = $service['liftgate'];
+                    }
+                    if ($laQuotes) {
+                        $allQuotes['limited'][] = $service['limited'];
+                    }
+                    if ($lgQuotes && $laQuotes) {
+                        $allQuotes['liftgate_limited'][] = $service['liftgate_limited'];
+                    }
                 }
             }
             if ($this->isMultiShipment) {
@@ -782,28 +828,72 @@ class Data extends AbstractHelper implements DataHelperInterface
      */
     public function getFinalQuotesArray($quotes)
     {
-        $lfg = $this->liftGate == 1 || ($this->isResi && $this->RADforLiftgate);
-        if ($this->isMultiShipment == false) {
-            if (isset($quotes['liftgate']) && $this->OfferLiftgateAsAnOption == 1 && ($this->RADforLiftgate == 0 || $this->isResi == 0)) {
-                /**
-                 * Condition for lift gate as an option
-                 * */
-                return array_merge($quotes['simple'], $quotes['liftgate']);
-            } elseif ($lfg) {
-                /**
-                 * Condition for Always lift gate and lift gate for residential (Single Shipment)
-                 * */
-                return $quotes['liftgate'];
+        // "Always" fees are baked into simple — no separate variants exist for them.
+        // Variants (liftgate, limited, liftgate_limited) only exist when offering as option or RAD-forced.
+        $radLgForced = $this->isResi && $this->RADforLiftgate && $this->liftGate != '1';
+        $radLaForced = $this->isResi && $this->RADforLimitedAccess && $this->limitedAccessDelivery != '1';
+        $offerLg     = $this->OfferLiftgateAsAnOption == '1';
+        $offerLa     = $this->offerLimitedAccessAsOption == '1';
+
+        if ($this->isMultiShipment) {
+            // For multi-shipment with RAD forced residential: same suppression as single shipment
+            if ($radLgForced && $radLaForced) {
+                // Only liftgate_limited applies
+                unset($quotes['simple'], $quotes['liftgate'], $quotes['limited']);
+            } elseif ($radLgForced) {
+                // Liftgate forced; LA offered as option or not
+                unset($quotes['simple']);
+                if (!$offerLa) {
+                    unset($quotes['limited'], $quotes['liftgate_limited']);
+                }
+            } elseif ($radLaForced) {
+                // LA forced; LG offered as option or not
+                unset($quotes['simple']);
+                if (!$offerLg) {
+                    unset($quotes['liftgate'], $quotes['liftgate_limited']);
+                }
             } else {
-                return $quotes['simple'];
+                // No RAD forced — keep only variants that are offered as options
+                if (!$offerLg) {
+                    unset($quotes['liftgate'], $quotes['liftgate_limited']);
+                }
+                if (!$offerLa) {
+                    unset($quotes['limited'], $quotes['liftgate_limited']);
+                }
             }
-        } elseif ($lfg) {
-            /**
-             * Condition for always lift gate and lift gate for residential (Multi Shipment)
-             * */
-            unset($quotes['simple']);
+            return $this->organizeQuotesArray($quotes);
         }
-        return $this->organizeQuotesArray($quotes);
+
+        // Single shipment
+        // Residential with RAD: suppress simple/option variants, show only the forced combined rate
+        if ($radLgForced && $radLaForced) {
+            return $quotes['liftgate_limited'] ?? [];
+        }
+        if ($radLgForced) {
+            // Residential forced liftgate; LA may also be offered as option alongside
+            return $offerLa
+                ? array_merge($quotes['liftgate'] ?? [], $quotes['liftgate_limited'] ?? [])
+                : ($quotes['liftgate'] ?? []);
+        }
+        if ($radLaForced) {
+            // Residential forced LA; LG may also be offered as option alongside
+            return $offerLg
+                ? array_merge($quotes['limited'] ?? [], $quotes['liftgate_limited'] ?? [])
+                : ($quotes['limited'] ?? []);
+        }
+
+        // Commercial (or no RAD): show simple + whichever option variants were built
+        $result = $quotes['simple'] ?? [];
+        if ($offerLg) {
+            $result = array_merge($result, $quotes['liftgate'] ?? []);
+        }
+        if ($offerLa) {
+            $result = array_merge($result, $quotes['limited'] ?? []);
+        }
+        if ($offerLg && $offerLa) {
+            $result = array_merge($result, $quotes['liftgate_limited'] ?? []);
+        }
+        return $result;
     }
 
     public function organizeQuotesArray($quotes)
@@ -813,7 +903,8 @@ class Data extends AbstractHelper implements DataHelperInterface
             if ($this->isMultiShipment) {
                 $rate = 0;
                 $code = '';
-                $isLiftGate = $key == 'liftgate' ? true : false;
+                $isLiftGate = in_array($key, ['liftgate', 'liftgate_limited']);
+                $isLimited  = in_array($key, ['limited', 'liftgate_limited']);
                 foreach ($value as $key2 => $data) {
                     $rate += $data['rate'];
                     $code = $data['code'];
@@ -821,7 +912,7 @@ class Data extends AbstractHelper implements DataHelperInterface
                 $quotesArr[] = [
                     'code' => $code,
                     'rate' => $rate,
-                    'title' => $this->getTitle('FRT', $isLiftGate, true),
+                    'title' => $this->getTitle('FRT', $isLiftGate, true, '', $isLimited),
                     'carrierType' => 'LTL',
                     'carrierName' => 'Worldwide Express LTL Freight Quotes'
                 ];
@@ -880,7 +971,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      *
      * @info: This will return specific code according to the accessorials for appending with the service code.
      */
-    public function getAccessorialCode($lgOption = false)
+    public function getAccessorialCode($lgOption = false, $laOption = false)
     {
         $access = '';
         if ($this->residentialDlvry == '1' || $this->isResi) {
@@ -888,6 +979,9 @@ class Data extends AbstractHelper implements DataHelperInterface
         }
         if (($lgOption || $this->liftGate == '1') || ($this->RADforLiftgate && $this->isResi)) {
             $access .= '+LG';
+        }
+        if ($laOption || $this->limitedAccessDelivery == '1' || ($this->RADforLimitedAccess && $this->isResi)) {
+            $access .= '+LA';
         }
 
         return $access;
@@ -901,11 +995,14 @@ class Data extends AbstractHelper implements DataHelperInterface
      *
      * @info: This function will calculate all prices and return price against a specific service
      */
-    public function calculatePrice($data, $lgOption = false, $getCost = false)
+    public function calculatePrice($data, $lgOption = false, $getCost = false, $laOption = false)
     {
         $lgCost = $lgOption ? 0 : $this->getLiftGateCost($data, $getCost);
         $basePrice = (float)$data->totalNetCharge->Amount;
         $basePrice = $basePrice - $lgCost;
+        if ($laOption || $this->limitedAccessDelivery == '1' || ($this->RADforLimitedAccess && $this->isResi)) {
+            $basePrice += (float)$this->limitedAccessFee;
+        }
         $basePrice = $this->calculateHandlingFee($basePrice);
         return $basePrice;
     }
@@ -958,27 +1055,39 @@ class Data extends AbstractHelper implements DataHelperInterface
      *
      * @info: This function will compile name of a service and return service name according to the settings enabled.
      */
-    public function getTitle($serviceName, $lgOption = false, $from = false, $deliveryEstimate = '')
+    public function getTitle($serviceName, $lgOption = false, $from = false, $deliveryEstimate = '', $laOption = false)
     {
         $serviceTitle = $this->customLabel($serviceName);
         if ($this->isMultiShipment && $from == false) {
             return $serviceTitle;
         }
         $deliveryEstimateLabel = (!empty($deliveryEstimate) && $this->configSettings['dlrvyEstimates']) ? ' (Estimated transit time of ' . $deliveryEstimate . ' business days)' : '';
-        $accessTitle = '';
-        if ($lgOption === true || $this->RADforLiftgate) {
-            if ($lgOption && $this->liftGate == '0') {
-                $accessTitle = $this->isResi ? $this->resiLgLabel : $this->lgLabel;
-            }
-            if ($this->liftGate == 1 && $this->isResi) {
-                $accessTitle = $this->resiLabel;
-            }
-            if ($this->RADforLiftgate && $this->isResi) {
-                $accessTitle = $this->resiLgLabel;
-            }
+
+        // "Always" modes bake fee into base price silently — no label change needed.
+        // Label only reflects: explicit option variants ($lgOption/$laOption) and RAD-triggered accessorials.
+        $isLg   = $lgOption || ($this->RADforLiftgate && $this->isResi && $this->liftGate != '1');
+        $isLa   = $laOption || ($this->RADforLimitedAccess && $this->isResi && $this->limitedAccessDelivery != '1');
+        // Show residential in label whenever the address is detected as residential
+        $isResi = $this->isResi;
+
+        if ($isResi && $isLg && $isLa) {
+            $accessTitle = $this->resiLgLaLabel;
+        } elseif ($isResi && $isLg) {
+            $accessTitle = $this->resiLgLabel;
+        } elseif ($isResi && $isLa) {
+            $accessTitle = $this->resiLaLabel;
+        } elseif ($isLg && $isLa) {
+            $accessTitle = $this->lgLaLabel;
+        } elseif ($isLg) {
+            $accessTitle = $this->lgLabel;
+        } elseif ($isLa) {
+            $accessTitle = $this->laLabel;
         } elseif ($this->isResi) {
             $accessTitle = $this->resiLabel;
+        } else {
+            $accessTitle = '';
         }
+
         return $serviceTitle . $accessTitle . $deliveryEstimateLabel;
     }
 
@@ -1283,7 +1392,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      *
      * @info: This function will compile quotes according the selected rating method.
      */
-    public function getCompiledQuotes($services, $arraySorting, $lgQuotes)
+    public function getCompiledQuotes($services, $arraySorting, $lgQuotes, $laQuotes = false)
     {
         if (empty($arraySorting) || empty($services)) {
             return [];
@@ -1292,7 +1401,7 @@ class Data extends AbstractHelper implements DataHelperInterface
         $options = ($this->configSettings['ratingMethod'] > 1 && $this->isMultiShipment == false) ? (int)$this->configSettings['options'] : 1;
         $sliced = array_slice($arraySorting['simple'], 0, $options, true);
         if ($this->configSettings['ratingMethod'] == 3) {
-            return $this->averageRattingMethod($arraySorting, $options, $lgQuotes);
+            return $this->averageRattingMethod($arraySorting, $options, $lgQuotes, $laQuotes ?? false);
         }
         return array_intersect_key($services, $sliced);
     }
@@ -1303,7 +1412,7 @@ class Data extends AbstractHelper implements DataHelperInterface
      * @param $lgQuotes
      * @return array
      */
-    public function averageRattingMethod($ratesArray, $options, $lgQuotes)
+    public function averageRattingMethod($ratesArray, $options, $lgQuotes, $laQuotes = false)
     {
         $sliced = array_slice($ratesArray['simple'], 0, $options, true);
         $simplePrice = $this->getAveragePrice($sliced, $options);
@@ -1322,6 +1431,30 @@ class Data extends AbstractHelper implements DataHelperInterface
                 'title' => $this->getTitle('Freight', $lgQuotes, true),
                 'code' => 'AVG' . $this->getAccessorialCode($lgQuotes),
                 'rate' => $lfgPrice,
+                'carrierType' => 'LTL',
+                'carrierName' => 'Worldwide Express LTL Freight Quotes'
+            ];
+        }
+        if ($laQuotes) {
+            asort($ratesArray['limited']);
+            $sliced = array_slice($ratesArray['limited'], 0, $options, true);
+            $laPrice = $this->getAveragePrice($sliced, $options);
+            $averageRateService[0]['limited'] = [
+                'title' => $this->getTitle('Freight', false, true, '', true),
+                'code' => 'AVG' . $this->getAccessorialCode(false, true),
+                'rate' => $laPrice,
+                'carrierType' => 'LTL',
+                'carrierName' => 'Worldwide Express LTL Freight Quotes'
+            ];
+        }
+        if ($lgQuotes && $laQuotes) {
+            asort($ratesArray['liftgate_limited']);
+            $sliced = array_slice($ratesArray['liftgate_limited'], 0, $options, true);
+            $lgLaPrice = $this->getAveragePrice($sliced, $options);
+            $averageRateService[0]['liftgate_limited'] = [
+                'title' => $this->getTitle('Freight', true, true, '', true),
+                'code' => 'AVG' . $this->getAccessorialCode(true, true),
+                'rate' => $lgLaPrice,
                 'carrierType' => 'LTL',
                 'carrierName' => 'Worldwide Express LTL Freight Quotes'
             ];

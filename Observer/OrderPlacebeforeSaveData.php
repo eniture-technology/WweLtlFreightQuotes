@@ -77,11 +77,12 @@ class OrderPlacebeforeSaveData implements ObserverInterface
 
     public function getData($order, $method, $orderDetailData, $multiShip)
     {
-        $liftGate = $resi = false;
+        $liftGate = $limitedAccess = $resi = false;
         $shippingMethod = empty($method) ? [] : explode('_', $method);
         /*These Lines are added for compatibility only*/
         $lgArray = ['always' => 1, 'asOption' => '', 'residentialLiftgate' => ''];
         $orderDetailData['residentialDelivery'] = 0;
+        $orderDetailData['limitedAccessDelivery'] = 0;
         /*These Lines are added for compatibility only*/
 
         $arr = empty($method) ? [] : (explode('+', $method));
@@ -93,6 +94,11 @@ class OrderPlacebeforeSaveData implements ObserverInterface
             $orderDetailData['residentialDelivery'] = 1;
             $resi = true;
         }
+        if (in_array('LA', $arr)) {
+            $orderDetailData['limitedAccessDelivery'] = 1;
+            $limitedAccess = true;
+        }
+
         foreach ($orderDetailData['shipmentData'] as $key => $value) {
             if ($multiShip) {
                 if ($shippingMethod[1] == 'ownArrangement') {
@@ -105,8 +111,12 @@ class OrderPlacebeforeSaveData implements ObserverInterface
                     ];
                 } else {
                     $quotes = reset($value['quotes']);
-                    if ($liftGate) {
+                    if ($liftGate && $limitedAccess && isset($quotes['liftgate_limited'])) {
+                        $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['liftgate_limited'];
+                    } elseif ($liftGate && isset($quotes['liftgate'])) {
                         $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['liftgate'];
+                    } elseif ($limitedAccess && isset($quotes['limited'])) {
+                        $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['limited'];
                     } else {
                         $orderDetailData['shipmentData'][$key]['quotes'] = $quotes['simple'];
                     }
